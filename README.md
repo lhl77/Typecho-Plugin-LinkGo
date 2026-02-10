@@ -1,9 +1,9 @@
 # LinkGo ：Typecho 跳转中间页插件
 
-[![Release](https://img.shields.io/github/v/release/lhl77/Typecho-Plugins-LinkGo?label=release)](https://github.com/lhl77/Typecho-Plugins-LinkGo/releases)
-[![Stars](https://img.shields.io/github/stars/lhl77/Typecho-Plugins-LinkGo?style=social)](https://github.com/lhl77/Typecho-Plugins-LinkGo/stargazers)
-[![Issues](https://img.shields.io/github/issues/lhl77/Typecho-Plugins-LinkGo)](https://github.com/lhl77/Typecho-Plugins-LinkGo/issues)
-[![License](https://img.shields.io/github/license/lhl77/Typecho-Plugins-LinkGo)](https://github.com/lhl77/Typecho-Plugins-LinkGo/blob/master/LICENSE)
+[![Release](https://img.shields.io/github/v/release/lhl77/Typecho-Plugin-LinkGo?label=release)](https://github.com/lhl77/Typecho-Plugin-LinkGo/releases)
+[![Stars](https://img.shields.io/github/stars/lhl77/Typecho-Plugin-LinkGo?style=social)](https://github.com/lhl77/Typecho-Plugin-LinkGo/stargazers)
+[![Issues](https://img.shields.io/github/issues/lhl77/Typecho-Plugin-LinkGo)](https://github.com/lhl77/Typecho-Plugin-LinkGo/issues)
+[![License](https://img.shields.io/github/license/lhl77/Typecho-Plugin-LinkGo)](https://github.com/lhl77/Typecho-Plugin-LinkGo/blob/master/LICENSE)
 
 跳转页模板位于插件目录：
 `LinkGo/page/themes/<ThemeName>/template.php` 与 `style.css`。
@@ -44,7 +44,7 @@ LinkGo/
 注意：若你直接包含 `template.php`（例如本地测试），请确保这些变量存在或为其设置默认值，以防 PHP Notice。
 
 ## 贡献与支持
-- 项目仓库： https://github.com/lhl77/Typecho-Plugins-LinkGo
+- 项目仓库： https://github.com/lhl77/Typecho-Plugin-LinkGo
 - 使用文档（作者博客）： https://blog.lhl.one/artical/949.html
 
 欢迎提交 Issue 或 Pull Request，主题模板与样式也非常欢迎贡献示例主题。

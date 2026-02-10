@@ -5,7 +5,7 @@
  * @package LinkGo
  * @author LHL
  * @version 1.0.0
- * @link https://github.com/lhl77/Typecho-Plugins-LinkGo
+ * @link https://github.com/lhl77/Typecho-Plugin-LinkGo
  */
 class LinkGo_Plugin implements Typecho_Plugin_Interface
 {
@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function(){
     // 在卡片 header 内插入 actions（包含同步按钮）
     var actions = document.createElement('div');
     actions.className = 'actions';
-    actions.innerHTML = '<a class="linkgo-chip" href="https://github.com/lhl77/Typecho-Plugins-LinkGo" target="_blank" rel="noopener noreferrer">GitHub 仓库</a><a class="linkgo-chip" href="https://blog.lhl.one/artical/949.html#主题开发" target="_blank" rel="noopener noreferrer">主题开发文档</a><a class="linkgo-chip" href="https://blog.lhl.one/artical/949.html#主题" target="_blank" rel="noopener noreferrer">更多主题</a>';
+    actions.innerHTML = '<a class="linkgo-chip" href="https://github.com/lhl77/Typecho-Plugin-LinkGo" target="_blank" rel="noopener noreferrer">GitHub 仓库</a><a class="linkgo-chip" href="https://blog.lhl.one/artical/949.html#主题开发" target="_blank" rel="noopener noreferrer">主题开发文档</a><a class="linkgo-chip" href="https://blog.lhl.one/artical/949.html#主题" target="_blank" rel="noopener noreferrer">更多主题</a>';
     header.appendChild(actions);
     }
 });
