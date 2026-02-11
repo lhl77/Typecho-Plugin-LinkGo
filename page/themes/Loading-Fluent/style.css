@@ -1,0 +1,59 @@
+/* 微软 Fluent Design 风格加载页面样式 */
+:root {
+  --fluent-primary: #0078d4;
+  --fluent-background: #f3f2f1;
+  --fluent-circle-size: 20px;
+  --fluent-circle-spacing: 10px;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html, body {
+  height: 100%;
+  background: var(--fluent-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+body {
+  font-family: Segoe UI, system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+.fluent-loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+.fluent-spinner {
+  display: flex;
+  justify-content: space-between;
+  width: calc(var(--fluent-circle-size) * 4 + var(--fluent-circle-spacing) * 3);
+}
+.fluent-circle {
+  width: var(--fluent-circle-size);
+  height: var(--fluent-circle-size);
+  background-color: var(--fluent-primary);
+  border-radius: 50%;
+  animation: fluent-bounce 1.2s infinite ease-in-out;
+}
+.fluent-circle:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.fluent-circle:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.fluent-circle:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes fluent-bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}

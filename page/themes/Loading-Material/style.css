@@ -1,0 +1,58 @@
+/* Material Design 风格加载页面样式 */
+:root {
+  --md-primary: linear-gradient(90deg, #7c3aed, #3b82c4);
+  --md-background: #f8fafc;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html, body {
+  height: 100%;
+  background: var(--md-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+body {
+  font-family: Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+.spinner {
+  animation: rot 2s linear infinite;
+}
+.circular {
+  animation: rot 2s linear infinite;
+}
+@keyframes rot {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.path {
+  stroke-dasharray: 90, 200;
+  stroke-dashoffset: 0;
+  animation: dash 1.6s ease-in-out infinite;
+  stroke: url(#g);
+}
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+  100% {
+    stroke-dasharray: 90,200; stroke-dashoffset: -124px;
+  }
+}
