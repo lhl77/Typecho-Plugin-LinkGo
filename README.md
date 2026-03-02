@@ -5,8 +5,6 @@
 [![Issues](https://img.shields.io/github/issues/lhl77/Typecho-Plugin-LinkGo)](https://github.com/lhl77/Typecho-Plugin-LinkGo/issues)
 [![License](https://img.shields.io/github/license/lhl77/Typecho-Plugin-LinkGo)](https://github.com/lhl77/Typecho-Plugin-LinkGo/blob/master/LICENSE)
 
-![](https://bu.dusays.com/2026/02/11/698c59e291057.jpg)
-
 跳转页模板位于插件目录：
 `LinkGo/page/themes/<ThemeName>/template.php` 与 `style.css`。
 
@@ -14,9 +12,6 @@
 1. 把 `LinkGo` 文件夹放到 Typecho 的 `usr/plugins/` 目录下（或你项目的相应插件目录）。
 2. 在 Typecho 管理后台 -> 插件，启用 LinkGo。
 3. 启用后插件会尝试注册 `/go/[target]` 路由（不同 Typecho 版本可能差异），启用失败请手动刷新插件或在 Typecho 后台禁用再启用一次。
-
-## 更多主题请查看： https://blog.lhl.one/artical/949.html
-欢迎投稿，请提PR
 
 ## 主题目录结构与约定
 在插件目录下放置主题：

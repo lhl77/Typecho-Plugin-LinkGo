@@ -88,6 +88,8 @@ class LinkGo_Action extends Typecho_Widget
             $url = 'https://' . $_SERVER['HTTP_HOST'];
         }
 
+    // 注意：白名单仅用于“不改写外链”。/go 路由仍按原逻辑渲染提示页。
+
         $parsed_url = parse_url($url);
         $display_url = $parsed_url['host'] ?? $url;
 
