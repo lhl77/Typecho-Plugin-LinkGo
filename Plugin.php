@@ -4,7 +4,7 @@
  * 
  * @package LinkGo
  * @author LHL
- * @version 1.0.1
+ * @version 1.0.2
  * @link https://github.com/lhl77/Typecho-Plugin-LinkGo
  */
 class LinkGo_Plugin implements Typecho_Plugin_Interface
@@ -306,6 +306,15 @@ LG_PLUGIN_CONFIG_SCRIPT;
             _t('AJAX兼容（当主题使用 AJAX 时推荐开启）')
         );
         $form->addInput($enableClient);
+
+        $skipLinksPluginUrls = new Typecho_Widget_Helper_Form_Element_Radio(
+            'skipLinksPluginUrls',
+            array('1' => '是（不接管）', '0' => '否'),
+            '0',
+            _t('不接管Links友链中的url'),
+            _t('启用后，如果外链 URL 与 Links 插件中已启用的友链 URL 相同，LinkGo 将保持原链接，不改写成 /go/xxx。')
+        );
+        $form->addInput($skipLinksPluginUrls);
         
         // 网址白名单
         // Typecho 的表单 textarea 元素在不同版本/提示文件中可能存在命名差异，这里做一个兼容兜底
@@ -439,6 +448,209 @@ LG_PLUGIN_CONFIG_SCRIPT;
         return $host === $ruleHost;
     }
 
+    private static function getPluginOptions()
+    {
+        try {
+            return Typecho_Widget::widget('Widget_Options')->plugin('LinkGo');
+        } catch (Exception $e) {
+            return null;
+        } catch (Throwable $e) {
+            return null;
+        }
+    }
+
+    private static function isEnabledOption($pluginOptions, $key, $default = false)
+    {
+        if (!$pluginOptions || !isset($pluginOptions->{$key})) {
+            return (bool)$default;
+        }
+
+        return (string)$pluginOptions->{$key} === '1';
+    }
+
+    private static function normalizeComparableUrl($url)
+    {
+        $url = trim((string)$url);
+        if ($url === '' || !preg_match('#^https?://#i', $url)) {
+            return '';
+        }
+
+        $parts = parse_url($url);
+        if (!is_array($parts) || empty($parts['scheme']) || empty($parts['host'])) {
+            return '';
+        }
+
+        $scheme = strtolower((string)$parts['scheme']);
+        if ($scheme !== 'http' && $scheme !== 'https') {
+            return '';
+        }
+
+        $host = strtolower(rtrim((string)$parts['host'], '.'));
+        if ($host === '') {
+            return '';
+        }
+
+        $port = isset($parts['port']) ? (int)$parts['port'] : 0;
+        if (($scheme === 'http' && $port === 80) || ($scheme === 'https' && $port === 443)) {
+            $port = 0;
+        }
+
+        $path = isset($parts['path']) ? (string)$parts['path'] : '/';
+        if ($path === '') {
+            $path = '/';
+        }
+
+        $query = isset($parts['query']) ? ('?' . (string)$parts['query']) : '';
+        $fragment = isset($parts['fragment']) ? ('#' . (string)$parts['fragment']) : '';
+
+        if ($query === '' && $fragment === '') {
+            $path = rtrim($path, '/');
+            if ($path === '') {
+                $path = '/';
+            }
+        }
+
+        return $scheme . '://' . $host . ($port > 0 ? ':' . $port : '') . $path . $query . $fragment;
+    }
+
+    private static function getLinksPluginUrlMap()
+    {
+        static $cache = null;
+
+        if ($cache !== null) {
+            return $cache;
+        }
+
+        $cache = array();
+
+        try {
+            $db = Typecho_Db::get();
+            $prefix = $db->getPrefix();
+            $rows = $db->fetchAll(
+                $db->select('url')
+                    ->from($prefix . 'links')
+                    ->where('state = ?', 1)
+            );
+
+            if (is_array($rows)) {
+                foreach ($rows as $row) {
+                    $normalized = self::normalizeComparableUrl(isset($row['url']) ? $row['url'] : '');
+                    if ($normalized !== '') {
+                        $cache[$normalized] = true;
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            $cache = array();
+        } catch (Throwable $e) {
+            $cache = array();
+        }
+
+        return $cache;
+    }
+
+    private static function isLinksPluginManagedUrl($url, $pluginOptions = null)
+    {
+        if ($pluginOptions === null) {
+            $pluginOptions = self::getPluginOptions();
+        }
+
+        if (!self::isEnabledOption($pluginOptions, 'skipLinksPluginUrls', false)) {
+            return false;
+        }
+
+        $normalized = self::normalizeComparableUrl($url);
+        if ($normalized === '') {
+            return false;
+        }
+
+        $urlMap = self::getLinksPluginUrlMap();
+        return isset($urlMap[$normalized]);
+    }
+
+    private static function shouldBypassExternalUrl($url, $pluginOptions = null)
+    {
+        return self::isWhitelistedUrl($url, $pluginOptions) || self::isLinksPluginManagedUrl($url, $pluginOptions);
+    }
+
+    private static function protectSkipZones($content, array &$protected)
+    {
+        $protected = array();
+        $patterns = array(
+            '/<pre\b[^>]*>.*?<\/pre>/is',
+            '/<code\b[^>]*>.*?<\/code>/is',
+        );
+
+        foreach ($patterns as $pattern) {
+            $content = preg_replace_callback(
+                $pattern,
+                function ($matches) use (&$protected) {
+                    $token = '<!--LINKGO_SKIP_' . count($protected) . '-->';
+                    $protected[$token] = $matches[0];
+                    return $token;
+                },
+                $content
+            );
+        }
+
+        return $content;
+    }
+
+    private static function restoreSkipZones($content, array $protected)
+    {
+        if (empty($protected)) {
+            return $content;
+        }
+
+        return strtr($content, $protected);
+    }
+
+    private static function rewriteHtmlAnchors($content, $siteHost, $siteUrl, $pluginOptions)
+    {
+        if (!is_string($content) || $content === '') {
+            return $content;
+        }
+
+        $protected = array();
+        $content = self::protectSkipZones($content, $protected);
+
+        $content = preg_replace_callback(
+            '/<a\s+([^>]*?)href=("|\')(.*?)\2([^>]*)>/i',
+            function ($matches) use ($siteHost, $siteUrl, $pluginOptions) {
+                $beforeAttrs = $matches[1];
+                $href = $matches[3];
+                $afterAttrs = $matches[4];
+
+                if (empty($href)) {
+                    return $matches[0];
+                }
+
+                $targetHost = parse_url($href, PHP_URL_HOST);
+                $isExternal = $targetHost && strcasecmp($targetHost, $siteHost) !== 0;
+
+                if (!$isExternal) {
+                    return '<a ' . $beforeAttrs . 'href="' . $href . '"' . $afterAttrs . '>';
+                }
+
+                $openNew = self::isEnabledOption($pluginOptions, 'openInNewTab', true);
+
+                if (self::shouldBypassExternalUrl($href, $pluginOptions)) {
+                    return '<a ' . $beforeAttrs . 'href="' . $href . '"' . $afterAttrs . ($openNew ? ' target="_blank"' : '') . ' rel="nofollow noopener noreferrer">';
+                }
+
+                $encodedUrl = rtrim(strtr(base64_encode($href), '+/', '-_'), '=');
+                $newHref = rtrim($siteUrl, '/') . '/go/' . $encodedUrl;
+                $rel = 'nofollow noopener noreferrer';
+                $targetAttr = $openNew ? ' target="_blank"' : '';
+
+                return '<a ' . $beforeAttrs . 'href="' . $newHref . '"' . $afterAttrs . $targetAttr . ' rel="' . $rel . '">';
+            },
+            $content
+        );
+
+        return self::restoreSkipZones($content, $protected);
+    }
+
     /**
      * 判断 URL 是否命中白名单。
      */
@@ -492,59 +704,12 @@ LG_PLUGIN_CONFIG_SCRIPT;
         $content = empty($lastResult) ? $content : $lastResult;
         $siteUrl = Typecho_Widget::widget('Widget_Options')->siteUrl;
         $siteHost = parse_url($siteUrl, PHP_URL_HOST);
+        $pluginOptions = self::getPluginOptions();
 
         // 调试：如果需要验证钩子是否被调用，取消下一行注释以把信息写入 PHP 错误日志
         // error_log('[LinkGo] convertLinks called for widget: ' . (is_object($widget) ? get_class($widget) : 'unknown'));
 
-        // 支持属性顺序任意，href 单双引号
-        return preg_replace_callback(
-            '/<a\s+([^>]*?)href=("|\')(.*?)\2([^>]*)>/i',
-            function ($matches) use ($siteHost, $siteUrl) {
-                $beforeAttrs = $matches[1];
-                $href = $matches[3];
-                $afterAttrs = $matches[4];
-
-                // 如果 href 为空，直接返回原始标签
-                if (empty($href)) {
-                    return $matches[0];
-                }
-
-                $targetHost = parse_url($href, PHP_URL_HOST);
-                $isExternal = $targetHost && strcasecmp($targetHost, $siteHost) !== 0;
-
-                if ($isExternal) {
-                    // 读取插件设置（如果可用）
-                    $pluginOptions = null;
-                    try {
-                        $pluginOptions = Typecho_Widget::widget('Widget_Options')->plugin('LinkGo');
-                    } catch (Exception $e) {
-                        $pluginOptions = null;
-                    }
-
-                    $openNew = isset($pluginOptions->openInNewTab) ? ($pluginOptions->openInNewTab === '1') : true;
-
-                    // 白名单：命中则不改写为 /go
-                    if (self::isWhitelistedUrl($href, $pluginOptions)) {
-                        return '<a ' . $beforeAttrs . 'href="' . $href . '"' . $afterAttrs . ($openNew ? ' target="_blank"' : '') . ' rel="nofollow noopener noreferrer">';
-                    }
-
-                    // 使用 URL-safe base64（替换 +/ 为 -_ 并移除尾部 =），放在路径中
-                    $encodedUrl = rtrim(strtr(base64_encode($href), '+/', '-_'), '=');
-                    // 使用路径形式 /go/<encoded>
-                    $newHref = rtrim($siteUrl, '/') . '/go/' . $encodedUrl;
-
-                    // rel 一律加上安全项
-                    $rel = 'nofollow noopener noreferrer';
-                    $targetAttr = $openNew ? ' target="_blank"' : '';
-                    // 保持原始其他属性
-                    return '<a ' . $beforeAttrs . 'href="' . $newHref . '"' . $afterAttrs . $targetAttr . ' rel="' . $rel . '">';
-                } else {
-                    // 内部链接，保持不变
-                    return '<a ' . $beforeAttrs . 'href="' . $href . '"' . $afterAttrs . '>';
-                }
-            },
-            $content
-        );
+        return self::rewriteHtmlAnchors($content, $siteHost, $siteUrl, $pluginOptions);
     }
 
     public static function convertCommentLinks($content, $widget, $lastResult)
@@ -552,48 +717,12 @@ LG_PLUGIN_CONFIG_SCRIPT;
         $content = empty($lastResult) ? $content : $lastResult;
         $siteUrl = Typecho_Widget::widget('Widget_Options')->siteUrl;
         $siteHost = parse_url($siteUrl, PHP_URL_HOST);
+        $pluginOptions = self::getPluginOptions();
 
         // 调试日志（取消注释以启用）
         // error_log('[LinkGo] convertCommentLinks called for widget: ' . (is_object($widget) ? get_class($widget) : 'unknown'));
 
-        return preg_replace_callback(
-            '/<a\s+([^>]*?)href=("|\')(.*?)\2([^>]*)>/i',
-            function ($matches) use ($siteHost, $siteUrl) {
-                $beforeAttrs = $matches[1];
-                $href = $matches[3];
-                $afterAttrs = $matches[4];
-
-                if (empty($href))
-                    return $matches[0];
-
-                $targetHost = parse_url($href, PHP_URL_HOST);
-                $isExternal = $targetHost && strcasecmp($targetHost, $siteHost) !== 0;
-
-                if ($isExternal) {
-                    $pluginOptions = null;
-                    try {
-                        $pluginOptions = Typecho_Widget::widget('Widget_Options')->plugin('LinkGo');
-                    } catch (Exception $e) {
-                        $pluginOptions = null;
-                    }
-                    $openNew = isset($pluginOptions->openInNewTab) ? ($pluginOptions->openInNewTab === '1') : true;
-
-                    // 白名单：命中则不改写为 /go
-                    if (self::isWhitelistedUrl($href, $pluginOptions)) {
-                        return '<a ' . $beforeAttrs . 'href="' . $href . '"' . $afterAttrs . ($openNew ? ' target="_blank"' : '') . ' rel="nofollow noopener noreferrer">';
-                    }
-
-                    $encodedUrl = rtrim(strtr(base64_encode($href), '+/', '-_'), '=');
-                    $newHref = rtrim($siteUrl, '/') . '/go/' . $encodedUrl;
-                    $rel = 'nofollow noopener noreferrer';
-                    $targetAttr = $openNew ? ' target="_blank"' : '';
-                    return '<a ' . $beforeAttrs . 'href="' . $newHref . '"' . $afterAttrs . $targetAttr . ' rel="' . $rel . '">';
-                } else {
-                    return '<a ' . $beforeAttrs . 'href="' . $href . '"' . $afterAttrs . '>';
-                }
-            },
-            $content
-        );
+        return self::rewriteHtmlAnchors($content, $siteHost, $siteUrl, $pluginOptions);
     }
 
     public static function convertAuthorUrl($comment, $widget)
@@ -608,16 +737,10 @@ LG_PLUGIN_CONFIG_SCRIPT;
         if (!empty($url)) {
             $targetHost = parse_url($url, PHP_URL_HOST);
             if ($targetHost && strcasecmp($targetHost, $siteHost) !== 0) {
-                $pluginOptions = null;
-                try {
-                    $pluginOptions = Typecho_Widget::widget('Widget_Options')->plugin('LinkGo');
-                } catch (Exception $e) {
-                    $pluginOptions = null;
-                }
-                $openNew = isset($pluginOptions->openInNewTab) ? ($pluginOptions->openInNewTab === '1') : true;
+                $pluginOptions = self::getPluginOptions();
+                $openNew = self::isEnabledOption($pluginOptions, 'openInNewTab', true);
 
-                // 白名单：命中则保持原 url 不改写
-                if (self::isWhitelistedUrl($url, $pluginOptions)) {
+                if (self::shouldBypassExternalUrl($url, $pluginOptions)) {
                     return $comment;
                 }
 
@@ -693,6 +816,14 @@ LG_PLUGIN_CONFIG_SCRIPT;
                 } catch (Exception $e) {
                     $rawWhitelist = '';
                 }
+                $skipLinksPluginUrls = self::isEnabledOption(isset($pluginOptions2) ? $pluginOptions2 : null, 'skipLinksPluginUrls', false);
+                $linksPluginUrlsJson = '[]';
+                if ($skipLinksPluginUrls) {
+                    $linksPluginUrlsJson = json_encode(array_values(array_keys(self::getLinksPluginUrlMap())));
+                    if (!is_string($linksPluginUrlsJson) || $linksPluginUrlsJson === '') {
+                        $linksPluginUrlsJson = '[]';
+                    }
+                }
                 // 使用 base64 注入，避免 JS 字符串出现未转义换行导致语法错误
                 $whitelistB64 = base64_encode($rawWhitelist);
 
@@ -703,6 +834,8 @@ LG_PLUGIN_CONFIG_SCRIPT;
     var siteBase = "__LINKGO_SITE__" || (window.location.origin || '');
     var rawWhitelist = '';
     var rawWhitelistB64 = "__LINKGO_WL_B64__";
+    var skipLinksPluginUrls = "__LINKGO_SKIP_LINKS__" === '1';
+    var linksPluginUrls = __LINKGO_LINKS_URLS__;
     try{
         rawWhitelist = rawWhitelistB64 ? atob(String(rawWhitelistB64)) : '';
     }catch(e){
@@ -772,6 +905,38 @@ LG_PLUGIN_CONFIG_SCRIPT;
     }
 
     var WL = parseWhitelist(rawWhitelist);
+    var linksUrlMap = {};
+
+    function normalizeComparableHref(href){
+        if(!href) return '';
+        try{
+            var u = new URL(href, location.href);
+            if(u.protocol !== 'http:' && u.protocol !== 'https:') return '';
+            var scheme = (u.protocol || '').toLowerCase();
+            var host = (u.hostname || '').toLowerCase().replace(/\.$/, '');
+            var port = u.port || '';
+            if((scheme === 'http:' && port === '80') || (scheme === 'https:' && port === '443')){
+                port = '';
+            }
+            var path = u.pathname || '/';
+            if(!u.search && !u.hash){
+                path = path.replace(/\/+$/, '');
+                if(path === '') path = '/';
+            }
+            return scheme + '//' + host + (port ? ':' + port : '') + path + (u.search || '') + (u.hash || '');
+        }catch(e){
+            return '';
+        }
+    }
+
+    if(skipLinksPluginUrls && linksPluginUrls && linksPluginUrls.length){
+        for(var li=0; li<linksPluginUrls.length; li++){
+            var normalizedLink = normalizeComparableHref(linksPluginUrls[li]);
+            if(normalizedLink){
+                linksUrlMap[normalizedLink] = true;
+            }
+        }
+    }
 
     function isWhitelistedHref(href){
         if(!href) return false;
@@ -791,6 +956,16 @@ LG_PLUGIN_CONFIG_SCRIPT;
         return false;
     }
 
+    function isLinksPluginHref(href){
+        if(!skipLinksPluginUrls) return false;
+        var normalized = normalizeComparableHref(href);
+        return !!(normalized && linksUrlMap[normalized]);
+    }
+
+    function isInsideCodeLike(node){
+        return !!(node && node.closest && node.closest('code, pre'));
+    }
+
     function urlSafeBase64Encode(str){
         try{var b64 = btoa(unescape(encodeURIComponent(str)));return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}catch(e){return null}
     }
@@ -804,9 +979,11 @@ LG_PLUGIN_CONFIG_SCRIPT;
     function rewriteAnchor(a){
         if(!a || !a.getAttribute) return;
         if(a.dataset && a.dataset.linkgoRewritten==='1') return;
+        if(isInsideCodeLike(a)) return;
         var href = a.getAttribute('href') || a.href;
         if(!isExternalHref(href)) return;
     if(isWhitelistedHref(href)) return;
+        if(isLinksPluginHref(href)) return;
         var enc = urlSafeBase64Encode(href);
         if(!enc) return;
         a.setAttribute('href', siteBase.replace(/\/$/, '') + '/go/' + enc);
@@ -842,8 +1019,8 @@ LINKGO_JS;
                 // 注入 PHP 变量到 nowdoc 生成的脚本中
                 $siteBaseVal = rtrim($siteUrl, '/');
                 $script = str_replace(
-                    array('__LINKGO_SITE__', '__LINKGO_WL_B64__'),
-                    array(addslashes($siteBaseVal), addslashes($whitelistB64)),
+                    array('__LINKGO_SITE__', '__LINKGO_WL_B64__', '__LINKGO_SKIP_LINKS__', '__LINKGO_LINKS_URLS__'),
+                    array(addslashes($siteBaseVal), addslashes($whitelistB64), $skipLinksPluginUrls ? '1' : '0', $linksPluginUrlsJson),
                     $script
                 );
 
