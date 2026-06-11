@@ -4,7 +4,7 @@
  * 
  * @package LinkGo
  * @author LHL
- * @version 1.0.2
+ * @version 1.0.3
  * @link https://github.com/lhl77/Typecho-Plugin-LinkGo
  */
 class LinkGo_Plugin implements Typecho_Plugin_Interface
@@ -632,18 +632,14 @@ LG_PLUGIN_CONFIG_SCRIPT;
                     return '<a ' . $beforeAttrs . 'href="' . $href . '"' . $afterAttrs . '>';
                 }
 
-                $openNew = self::isEnabledOption($pluginOptions, 'openInNewTab', true);
-
                 if (self::shouldBypassExternalUrl($href, $pluginOptions)) {
-                    return '<a ' . $beforeAttrs . 'href="' . $href . '"' . $afterAttrs . ($openNew ? ' target="_blank"' : '') . ' rel="nofollow noopener noreferrer">';
+                    return '<a ' . $beforeAttrs . 'href="' . $href . '"' . $afterAttrs . '>';
                 }
 
                 $encodedUrl = rtrim(strtr(base64_encode($href), '+/', '-_'), '=');
                 $newHref = rtrim($siteUrl, '/') . '/go/' . $encodedUrl;
-                $rel = 'nofollow noopener noreferrer';
-                $targetAttr = $openNew ? ' target="_blank"' : '';
 
-                return '<a ' . $beforeAttrs . 'href="' . $newHref . '"' . $afterAttrs . $targetAttr . ' rel="' . $rel . '">';
+                return '<a ' . $beforeAttrs . 'href="' . $newHref . '"' . $afterAttrs . '>';
             },
             $content
         );
@@ -987,9 +983,6 @@ LG_PLUGIN_CONFIG_SCRIPT;
         var enc = urlSafeBase64Encode(href);
         if(!enc) return;
         a.setAttribute('href', siteBase.replace(/\/$/, '') + '/go/' + enc);
-        var rel = (a.getAttribute('rel')||'').split(/\s+/).filter(Boolean);
-        ['nofollow','noopener','noreferrer'].forEach(function(r){ if(rel.indexOf(r)===-1) rel.push(r); });
-        a.setAttribute('rel', rel.join(' '));
         if(a.dataset) a.dataset.linkgoRewritten='1';
     }
 
