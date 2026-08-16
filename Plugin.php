@@ -4,7 +4,7 @@
  * 
  * @package LinkGo
  * @author LHL
- * @version 1.0.3
+ * @version 1.0.4
  * @link https://github.com/lhl77/Typecho-Plugin-LinkGo
  */
 class LinkGo_Plugin implements Typecho_Plugin_Interface
@@ -34,20 +34,16 @@ class LinkGo_Plugin implements Typecho_Plugin_Interface
         // 旧式/兼容注册（适配老版本或部分主题）
         Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = array('LinkGo_Plugin', 'convertLinks');
         Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = array('LinkGo_Plugin', 'convertLinks');
-        Typecho_Plugin::factory('Widget_Abstract_Contents')->content = array('LinkGo_Plugin', 'convertLinks');
 
         Typecho_Plugin::factory('Widget_Abstract_Comments')->contentEx = array('LinkGo_Plugin', 'convertCommentLinks');
-        Typecho_Plugin::factory('Widget_Abstract_Comments')->content = array('LinkGo_Plugin', 'convertCommentLinks');
         // 尝试修改评论者链接字段（部分主题会读取 comment.url）
         Typecho_Plugin::factory('Widget_Abstract_Comments')->filter = array('LinkGo_Plugin', 'convertAuthorUrl');
 
         // Namespaced 注册（Typecho 新版/文档中常见写法）
         \Typecho\Plugin::factory('Widget\\Base\\Contents')->contentEx = ['LinkGo_Plugin', 'convertLinks'];
         \Typecho\Plugin::factory('Widget\\Base\\Contents')->excerptEx = ['LinkGo_Plugin', 'convertLinks'];
-        \Typecho\Plugin::factory('Widget\\Base\\Contents')->content = ['LinkGo_Plugin', 'convertLinks'];
 
         \Typecho\Plugin::factory('Widget\\Base\\Comments')->contentEx = ['LinkGo_Plugin', 'convertCommentLinks'];
-        \Typecho\Plugin::factory('Widget\\Base\\Comments')->content = ['LinkGo_Plugin', 'convertCommentLinks'];
         \Typecho\Plugin::factory('Widget\\Base\\Comments')->filter = ['LinkGo_Plugin', 'convertAuthorUrl'];
         // 兜底：在 Archive 渲染后再运行一次替换，覆盖绕开过滤器的主题实现
         \Typecho\Plugin::factory('Widget\\Archive')->afterRender = ['LinkGo_Plugin', 'applyToArchive'];
