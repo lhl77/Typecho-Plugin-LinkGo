@@ -5,6 +5,8 @@
 [![Issues](https://img.shields.io/github/issues/lhl77/Typecho-Plugin-LinkGo)](https://github.com/lhl77/Typecho-Plugin-LinkGo/issues)
 [![License](https://img.shields.io/github/license/lhl77/Typecho-Plugin-LinkGo)](https://github.com/lhl77/Typecho-Plugin-LinkGo/blob/master/LICENSE)
 
+AB Store Web 插件主页: https://ab-store.lhl.one/plugin/b51ca0f8
+
 跳转页模板位于插件目录：
 `LinkGo/page/themes/<ThemeName>/template.php` 与 `style.css`。
 
