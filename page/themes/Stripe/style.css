@@ -1,0 +1,87 @@
+/* LinkGo · Stripe 风格 */
+:root{
+    --st-bg:#FFFFFF;
+    --st-text:#0A2540;
+    --st-muted:#425466;
+    --st-border:#E3E8EE;
+    --st-surface:#F6F9FC;
+    --st-shadow:0 13px 27px -5px rgba(50,50,93,.10),0 8px 16px -8px rgba(0,0,0,.10);
+    --st-radius:12px;
+    color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,system-ui,'PingFang SC','Microsoft YaHei',sans-serif;
+    background:
+        radial-gradient(70% 50% at 50% 0%,rgba(103,80,164,.07) 0%,transparent 70%),
+        var(--st-bg);
+    color:var(--st-text);
+    -webkit-font-smoothing:antialiased;
+}
+.st-shell{
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:16px;padding:40px 20px;
+}
+.st-card{
+    width:100%;max-width:480px;
+    background:#fff;
+    border:1px solid var(--st-border);
+    border-radius:var(--st-radius);
+    padding:28px;
+    box-shadow:var(--st-shadow);
+}
+.st-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.st-logo{
+    width:40px;height:40px;border-radius:8px;overflow:hidden;
+    background:var(--st-surface);border:1px solid var(--st-border);
+    display:flex;align-items:center;justify-content:center;
+}
+.st-logo img{width:100%;height:100%;object-fit:contain}
+.st-kicker{
+    font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--st-muted);
+}
+.st-title{margin:0;font-size:24px;font-weight:600;letter-spacing:-.01em;line-height:1.3;color:var(--st-text)}
+.st-desc{margin:8px 0 0;font-size:14px;line-height:1.65;color:var(--st-muted)}
+.st-field{
+    margin-top:20px;padding:12px 14px;
+    background:var(--st-surface);
+    border:1px solid var(--st-border);
+    border-radius:8px;
+}
+.st-field-label{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--st-muted)}
+.st-field-value{
+    display:block;margin-top:6px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:13px;line-height:1.5;word-break:break-all;color:var(--st-text);
+}
+.st-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.st-btn{
+    flex:1 1 150px;
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:0 18px;
+    font-size:14px;font-weight:600;text-decoration:none;
+    border-radius:8px;border:1px solid transparent;
+    transition:transform .12s ease,box-shadow .12s ease,background .12s ease;
+}
+.st-btn--primary{
+    background:var(--lg-accent,#635BFF);
+    color:var(--lg-on-accent,#FFFFFF);
+    box-shadow:0 4px 14px color-mix(in srgb,var(--lg-accent,#635BFF) 28%,transparent);
+}
+.st-btn--primary:hover{transform:translateY(-1px);box-shadow:0 8px 20px color-mix(in srgb,var(--lg-accent,#635BFF) 34%,transparent)}
+.st-btn--secondary{
+    flex:0 1 auto;
+    background:#fff;color:var(--st-text);
+    border-color:var(--st-border);
+}
+.st-btn--secondary:hover{background:var(--st-surface)}
+.st-foot{font-size:12px;color:var(--st-muted)}
+@media (max-width:560px){
+    .st-shell{padding:24px 16px;justify-content:flex-start;padding-top:56px}
+    .st-card{padding:22px;border-radius:10px}
+    .st-title{font-size:21px}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.001ms!important}}

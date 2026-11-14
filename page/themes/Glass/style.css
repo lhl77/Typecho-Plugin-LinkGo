@@ -1,0 +1,108 @@
+/* LinkGo · Glass 风格（iOS / macOS HIG） */
+:root{
+    --ap-blue:var(--lg-accent,#007AFF);
+    --ap-blue-press:color-mix(in srgb,var(--lg-accent,#007AFF) 86%,#000);
+    --ap-bg:#F2F2F7;
+    --ap-card:rgba(255,255,255,.78);
+    --ap-card-border:rgba(255,255,255,.55);
+    --ap-text:#000;
+    --ap-text-2:rgba(60,60,67,.72);
+    --ap-sep:rgba(60,60,67,.16);
+    --ap-fill:rgba(118,118,128,.12);
+    /* 阴影与高光都跟随主题色 */
+    --ap-shadow:0 18px 48px color-mix(in srgb,var(--ap-blue) 24%,rgba(0,0,0,.22));
+    --ap-shadow-sm:0 8px 20px color-mix(in srgb,var(--ap-blue) 20%,rgba(0,0,0,.16));
+    color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+    :root{
+        --ap-blue:var(--lg-accent,#0A84FF);
+        --ap-blue-press:color-mix(in srgb,var(--lg-accent,#0A84FF) 86%,#000);
+        --ap-bg:#000;
+        --ap-card:rgba(28,28,30,.72);
+        --ap-card-border:rgba(255,255,255,.14);
+        --ap-text:#fff;
+        --ap-text-2:rgba(235,235,245,.62);
+        --ap-sep:rgba(84,84,88,.6);
+        --ap-fill:rgba(118,118,128,.24);
+    }
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Helvetica Neue','PingFang SC','Microsoft YaHei',sans-serif;
+    background:
+        radial-gradient(90% 60% at 50% 0%,color-mix(in srgb,var(--ap-blue) 12%,transparent) 0%,transparent 70%),
+        var(--ap-bg);
+    color:var(--ap-text);
+    -webkit-font-smoothing:antialiased;
+}
+.screen{
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:16px;
+    padding:40px 18px;padding-bottom:calc(28px + env(safe-area-inset-bottom));
+}
+.sheet{
+    width:100%;max-width:420px;
+    padding:28px 20px 20px;
+    border-radius:22px;
+    background:var(--ap-card);
+    border:1px solid var(--ap-card-border);
+    box-shadow:var(--ap-shadow);
+    backdrop-filter:blur(24px) saturate(180%);
+    -webkit-backdrop-filter:blur(24px) saturate(180%);
+}
+.sheet__top{text-align:center;padding:4px 6px 22px}
+.app-icon{
+    width:72px;height:72px;margin:0 auto 14px;
+    border-radius:18px;overflow:hidden;
+    background:var(--ap-fill);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:var(--ap-shadow-sm);
+}
+.app-icon img{width:100%;height:100%;object-fit:contain}
+.sheet__title{margin:0;font-size:20px;font-weight:650;letter-spacing:-.2px}
+.sheet__sub{margin:5px 0 0;font-size:13px;color:var(--ap-text-2)}
+.group{
+    border-radius:14px;background:var(--ap-fill);
+    padding:14px 14px 12px;
+}
+.group__label{
+    margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:.6px;
+    text-transform:uppercase;color:var(--ap-text-2);
+}
+.group__row{display:flex;align-items:center;gap:8px;min-width:0}
+.link-icon{flex:0 0 18px;width:18px;height:18px;color:var(--ap-blue);opacity:.9}
+.link-icon svg{width:18px;height:18px}
+.group__value{
+    flex:1 1 auto;min-width:0;
+    font-size:13.5px;line-height:1.45;word-break:break-all;
+}
+.group__note{
+    margin:10px 0 0;padding-top:10px;border-top:.5px solid var(--ap-sep);
+    font-size:12.5px;line-height:1.55;color:var(--ap-text-2);
+}
+.actions{margin-top:18px;display:flex;flex-direction:column;gap:10px}
+.btn{
+    display:flex;align-items:center;justify-content:center;
+    min-height:50px;padding:0 20px;border-radius:14px;
+    background:var(--ap-blue);color:var(--lg-on-accent,#fff);
+    font-size:16px;font-weight:600;letter-spacing:.1px;
+    text-decoration:none;
+    transition:background .15s ease,transform .15s ease;
+}
+.btn:hover{background:var(--ap-blue-press)}
+.btn:active{transform:scale(.985)}
+.btn:focus-visible{outline:3px solid color-mix(in srgb,var(--ap-blue) 40%,transparent);outline-offset:3px}
+.btn--secondary{
+    background:var(--ap-fill);color:var(--ap-text);
+    font-weight:500;min-height:44px;font-size:14px;
+}
+.btn--secondary:hover{background:color-mix(in srgb,var(--ap-fill) 75%,var(--ap-text) 8%)}
+.copyright{margin:0;font-size:12px;color:var(--ap-text-2);text-align:center}
+@media (max-width:520px){
+    .screen{padding:20px 12px;justify-content:flex-start;padding-top:56px}
+    .sheet{max-width:100%;border-radius:20px}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.001ms!important}}

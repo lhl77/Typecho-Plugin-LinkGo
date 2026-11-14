@@ -1,0 +1,48 @@
+/* LinkGo · Loading-Pulse：同心圆扩散脉冲 */
+:root{
+    --bg:#FFFFFF;
+    --fg:#141018;
+    --muted:#7C7686;
+    color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+    :root{--bg:#141018;--fg:#F5F2F8;--muted:#958FA0}
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+    margin:0;display:flex;align-items:center;justify-content:center;
+    background:var(--bg);color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;
+    -webkit-font-smoothing:antialiased;
+}
+.lp-wrap{display:flex;flex-direction:column;align-items:center;gap:22px;padding:24px;text-align:center}
+.lp-pulse{position:relative;width:96px;height:96px;display:flex;align-items:center;justify-content:center}
+.lp-pulse__ring{
+    position:absolute;inset:0;border-radius:50%;
+    border:1.5px solid color-mix(in srgb,var(--lg-accent,#F97316) 55%,transparent);
+    animation:lp-expand 2.4s cubic-bezier(.2,.6,.3,1) infinite;
+}
+.lp-pulse__ring--2{animation-delay:.8s}
+.lp-pulse__ring--3{animation-delay:1.6s}
+.lp-pulse__dot{
+    width:18px;height:18px;border-radius:50%;
+    background:var(--lg-accent,#F97316);
+    box-shadow:0 0 0 6px color-mix(in srgb,var(--lg-accent,#F97316) 18%,transparent);
+    animation:lp-beat 2.4s ease-in-out infinite;
+}
+@keyframes lp-expand{
+    0%{transform:scale(.28);opacity:.9}
+    70%{opacity:.12}
+    100%{transform:scale(1);opacity:0}
+}
+@keyframes lp-beat{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.12)}
+}
+.lp-text{margin:0;font-size:14px;font-weight:500;letter-spacing:.02em}
+.lp-sub{margin:0;font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){
+    .lp-pulse__ring{animation-duration:4.5s}
+    .lp-pulse__dot{animation:none}
+}

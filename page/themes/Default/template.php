@@ -1,65 +1,68 @@
 <!doctype html>
 <html lang="zh-CN">
+<?php
+// 跳转页展示设置（页面 loader 未提供时使用主题默认）
+$showFullUrl = !isset($showFullUrl) ? true : (bool)$showFullUrl;
+$showLogo = !isset($showLogo) ? true : (bool)$showLogo;
+$robotsContent = isset($robotsContent) ? $robotsContent : 'noindex, nofollow';
+$displayUrl = isset($displayUrl) && $displayUrl !== '' ? $displayUrl : (!empty($showFullUrl) ? $url : (isset($display_url) ? $display_url : $url));
+$siteTitle = isset($siteTitle) ? $siteTitle : '';
+$displayYear = isset($displayYear) ? $displayYear : date('Y');
+$themeName = isset($themeName) ? $themeName : 'Default';
+$themeCssFile = __DIR__ . '/style.css';
+$themeCssUrl = rtrim($siteUrl, '/') . '/usr/plugins/LinkGo/page/themes/' . rawurlencode($themeName) . '/style.css?v=' . (is_file($themeCssFile) ? filemtime($themeCssFile) : '1');
+?>
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#F6EDFF">
-    <title><?php echo htmlspecialchars($title ?? '', ENT_QUOTES); ?> - <?php echo htmlspecialchars($siteTitle ?? '', ENT_QUOTES); ?></title>
-    <!-- Font Awesome（图标） -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <?php
-    // 主题样式表，优先从插件目录的 page/themes/<theme>/style.css 引用
-    $themeCssUrl = rtrim($siteUrl, '/') . '/usr/plugins/LinkGo/page/themes/' . rawurlencode($themeName) . '/style.css';
-    ?>
+    <?php if ($robotsContent !== ''): ?><meta name="robots" content="<?php echo htmlspecialchars($robotsContent, ENT_QUOTES); ?>"><?php endif; ?>
+    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+    <title><?php echo htmlspecialchars($title ?? '', ENT_QUOTES); ?> - <?php echo htmlspecialchars($siteTitle, ENT_QUOTES); ?></title>
     <link rel="stylesheet" href="<?php echo htmlspecialchars($themeCssUrl, ENT_QUOTES); ?>">
+    <?php if (!empty($themeColor)): ?>
+    <style>:root{--lg-accent:<?php echo htmlspecialchars($themeColor, ENT_QUOTES); ?>;--lg-on-accent:<?php echo htmlspecialchars(isset($themeColorOn) ? $themeColorOn : '#FFFFFF', ENT_QUOTES); ?>;--lg-accent-soft:color-mix(in srgb,<?php echo htmlspecialchars($themeColor, ENT_QUOTES); ?> 16%,transparent)}</style>
+    <?php endif; ?>
 </head>
 
 <body>
-    <div class="wrap">
-        <div class="md-card" role="group" aria-labelledby="jump-title">
-            <div class="md-card__header">
+    <main class="page">
+        <section class="card" role="group" aria-labelledby="jump-title">
+            <header class="card__head">
+                <?php if (!empty($showLogo)): ?>
                 <div class="logo" aria-hidden="true">
                     <img src="<?php echo htmlspecialchars($logoUrl, ENT_QUOTES); ?>" alt="logo" onerror="this.style.display='none'">
                 </div>
-                <div>
-                    <div id="jump-title" class="title"><?php echo htmlspecialchars($siteTitle, ENT_QUOTES); ?> · 安全跳转</div>
-                    <div class="subtitle">为您确认目标链接安全性并提示潜在风险</div>
+                <?php endif; ?>
+                <div class="head__text">
+                    <h1 id="jump-title" class="head__title"><?php echo htmlspecialchars($siteTitle, ENT_QUOTES); ?><span class="head__dot">·</span>安全跳转</h1>
+                    <p class="head__sub">为您确认目标链接安全性并提示潜在风险</p>
                 </div>
-            </div>
+            </header>
 
-            <div class="md-card__body">
+            <div class="card__body">
                 <div class="notice">
-                    <div class="notice__icon" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="notice__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.6 3 8.4 7 10 4-1.6 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+                    </div>
                     <div class="notice__content">
-                        <div class="h">您即将离开本站并访问：</div>
-                        <p class="safety-url" title="<?php echo htmlspecialchars($url, ENT_QUOTES); ?>"><?php echo htmlspecialchars($url, ENT_QUOTES); ?></p>
-                        <p style="margin-top:12px;color:#6B6470">该网页不属于本站页面。我们无法确认该网页是否安全，可能包含未知安全隐患，请注意保护个人信息。</p>
+                        <p class="notice__label">您即将离开本站并访问：</p>
+                        <p class="url" title="<?php echo htmlspecialchars($url, ENT_QUOTES); ?>"><?php echo htmlspecialchars($displayUrl, ENT_QUOTES); ?></p>
+                        <p class="notice__text">该网页不属于本站页面。我们无法确认该网页是否安全，可能包含未知安全隐患，请注意保护个人信息。</p>
                     </div>
                 </div>
             </div>
 
-            <div class="md-card__actions" style="justify-content:center;">
-                <a class="btn btn--primary" id="continueBtn" href="<?php echo htmlspecialchars($url, ENT_QUOTES); ?>" rel="nofollow noopener" aria-label="继续访问">
-                    <span class="btn__icon"><i class="fa-solid fa-arrow-right-long"></i></span>
-                    <span class="btn__text">继续访问</span>
+            <div class="card__actions">
+                <a class="button" id="continueBtn" href="<?php echo htmlspecialchars(isset($ctaHref) ? $ctaHref : $url, ENT_QUOTES); ?>" rel="nofollow noopener" aria-label="继续访问">
+                    <span>继续访问</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                 </a>
             </div>
-            <style>
-                /* 覆盖：确保按钮在容器中正确显示和垂直居中 */
-                .md-card__actions { display:flex; justify-content:center; align-items:center; }
-                .btn { display:inline-flex; align-items:center; gap:10px; padding:12px 18px; border-radius:12px; text-decoration:none; }
-                .btn__icon { display:inline-flex; align-items:center; }
-                @media (max-width:640px) {
-                    .md-card__actions { padding:14px; }
-                    .btn { width:100%; justify-content:center; box-sizing:border-box; }
-                }
-            </style>
-    </div>
-    <div class="site-footer">&copy; <?php echo htmlspecialchars($displayYear, ENT_QUOTES); ?> <?php echo htmlspecialchars($siteTitle, ENT_QUOTES); ?></div>
-    </div>
-
+        </section>
+        <p class="footer">&copy; <?php echo htmlspecialchars($displayYear, ENT_QUOTES); ?> <?php echo htmlspecialchars($siteTitle, ENT_QUOTES); ?></p>
+    </main>
 </body>
 
 </html>

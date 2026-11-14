@@ -1,58 +1,54 @@
-/* Material Design 风格加载页面样式 */
-:root {
-  --md-primary: linear-gradient(90deg, #7c3aed, #3b82c4);
-  --md-background: #f8fafc;
+/* LinkGo · Loading-Material
+   复刻 Material 3 Expressive「Loading indicator」
+   - 尺寸：容器 48dp / 活动形状 38dp（按 2× 渲染 = 96px / 76px）
+   - 颜色：默认变体只用 primary（无容器底色）
+   - 形状：7 个 Material Shape 循环形变（SoftBurst → Cookie9Sided → Pentagon → Pill →
+     Sunny → Cookie4Sided → Oval），每 650ms 一次，SMIL animate 完成插值
+   - 旋转：每步额外 +90°（2600ms 一圈，分段缓动）叠加 4666ms 一圈的匀速自转 */
+:root{
+    --m3-bg:#FFFFFF;
+    /* M3 基线主题色：浅色 primary #6750A4，深色 primary #D0BCFF（淡紫） */
+    --m3-primary-fallback:#6750A4;
+    --m3-primary:var(--lg-accent,var(--m3-primary-fallback));
+    --m3-size:96px; /* 48dp × 2 */
+    color-scheme:light dark;
 }
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@media (prefers-color-scheme:dark){
+    :root{--m3-bg:#121212;--m3-primary-fallback:#D0BCFF}
 }
-html, body {
-  height: 100%;
-  background: var(--md-background);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+    margin:0;display:flex;align-items:center;justify-content:center;
+    background:var(--m3-bg);color:var(--m3-primary);
+    font-family:Roboto,'Noto Sans SC',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
 }
-body {
-  font-family: Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+.m3-loader{
+    position:relative;
+    width:var(--m3-size);height:var(--m3-size);
 }
-.loading-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
+.m3-spin,.m3-step{position:absolute;inset:0;display:block}
+/* 匀速整圈自转：4666ms（官方 GlobalRotationDurationMillis） */
+.m3-spin{animation:m3-global 4.666s linear infinite}
+/* 每次形变额外转 90°：4 步 2600ms 一圈，逐段缓动 */
+.m3-step{animation:m3-step 2.6s cubic-bezier(.2,0,.1,1) infinite}
+.m3-blob{display:block;width:100%;height:100%}
+@keyframes m3-global{
+    from{transform:rotate(0deg)}
+    to{transform:rotate(360deg)}
 }
-.spinner {
-  animation: rot 2s linear infinite;
+@keyframes m3-step{
+    0%{transform:rotate(0deg)}
+    25%{transform:rotate(90deg)}
+    50%{transform:rotate(180deg)}
+    75%{transform:rotate(270deg)}
+    100%{transform:rotate(360deg)}
 }
-.circular {
-  animation: rot 2s linear infinite;
+@media (prefers-reduced-motion:reduce){
+    .m3-spin{animation-duration:12s}
+    .m3-step{animation-duration:9s}
 }
-@keyframes rot {
-  100% {
-    transform: rotate(360deg);
-  }
-}
-.path {
-  stroke-dasharray: 90, 200;
-  stroke-dashoffset: 0;
-  animation: dash 1.6s ease-in-out infinite;
-  stroke: url(#g);
-}
-@keyframes dash {
-  0% {
-    stroke-dasharray: 1, 200;
-    stroke-dashoffset: 0;
-  }
-  50% {
-    stroke-dasharray: 90, 200;
-    stroke-dashoffset: -35px;
-  }
-  100% {
-    stroke-dasharray: 90,200; stroke-dashoffset: -124px;
-  }
-}
+
+
+

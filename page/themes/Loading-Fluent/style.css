@@ -1,6 +1,6 @@
 /* 微软 Fluent Design 风格加载页面样式 */
 :root {
-  --fluent-primary: #0078d4;
+  --fluent-primary: var(--lg-accent, #0078D4);
   --fluent-background: #f3f2f1;
   --fluent-circle-size: 20px;
   --fluent-circle-spacing: 10px;

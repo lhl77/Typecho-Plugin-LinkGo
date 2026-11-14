@@ -2,7 +2,7 @@
 :root {
   --md-surface: #ffffff;
   --md-on-surface: #0f172a;
-  --md-primary: linear-gradient(90deg, #7c3aed, #3b82c4);
+  --md-primary: #0D6EFD;
   --md-muted: #6b7280;
   --md-background: #f8fafc;
 }
@@ -35,6 +35,7 @@ body {
 }
 .spinner-border {
   animation: spinner-border .75s linear infinite;
+  color: var(--lg-accent, #0D6EFD) !important;
 }
 .circular {
   animation: rot 2s linear infinite;

@@ -1,14 +1,19 @@
 <?php
 /**
- * 外部链接自动跳转插件
+ * LinkGo 外部链接自动跳转插件
  * 
  * @package LinkGo
  * @author LHL
- * @version 1.0.4
+ * @version 1.2.0
  * @link https://github.com/lhl77/Typecho-Plugin-LinkGo
  */
 class LinkGo_Plugin implements Typecho_Plugin_Interface
 {
+    /**
+     * 插件版本（跳转页署名/控制台信息与设置页共用）
+     */
+    const VERSION = '1.2.0';
+
     /**
      * PHP 7/7.4 兼容：startsWith / endsWith（PHP8 才有 str_starts_with/str_ends_with）。
      */
@@ -90,207 +95,70 @@ class LinkGo_Plugin implements Typecho_Plugin_Interface
 
     public static function config(Typecho_Widget_Helper_Form $form)
     {
-        // 注入简洁的 Material Design 3 风格样式（非破坏性，仅覆盖少数控件样式以改善外观）
-        echo '<style>';
-        // 使用中性偏蓝的主色，避免黄色强调
-        echo ':root{--lg-primary:#3b82c4;--lg-on-primary:#ffffff;--lg-surface:#fff;--lg-muted:#6b7280;--lg-text:#0f172a}';
-        echo '.typecho-page-main .linkgo-md3{max-width:820px;margin:18px auto;padding:18px;border-radius:14px;position:relative}';
-        echo '.typecho-page-main .linkgo-md3 .typecho-label{font-weight:600;color:var(--lg-text);display:block;margin-bottom:6px}';
-        // 卡片头部样式（flex 布局，适配示例图）
-        echo '.typecho-page-main .linkgo-card-header{background:linear-gradient(135deg,#7c3aed 0%,#3b82c4 100%);border-radius:12px;padding:18px;color:#ffffff;margin-bottom:12px;box-shadow:0 10px 30px rgba(59,130,246,0.12);display:flex;align-items:center;justify-content:space-between;gap:12px}';
-        echo '.typecho-page-main .linkgo-card-header .left{display:flex;align-items:center;gap:14px}';
-        echo '.typecho-page-main .linkgo-card-header .logo{width:64px;height:64px;border-radius:16px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px}';
-        echo '.typecho-page-main .linkgo-card-header .title{font-size:22px;font-weight:800;margin-bottom:2px}';
-        echo '.typecho-page-main .linkgo-card-header .subtitle{font-size:13px;opacity:0.95}';
-    // header 内显示 actions（放入卡片内部）
-    echo '.typecho-page-main .linkgo-card-header .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}';
-    // actions 单独行样式（浅背景，圆角，支持换行）
-    echo '.typecho-page-main .linkgo-actions-row{margin-top:12px;padding:10px;border-radius:12px;background:#f6fbff;border:1px solid #e6f4ff;display:flex;gap:8px;flex-wrap:wrap;align-items:center}';
-    // chips 在浅色行上的样式（浅蓝色背景与深蓝文字），并保持单行显示
-    echo '.typecho-page-main .linkgo-actions-row .linkgo-chip{background:#e6f4ff;color:#0366d6;padding:6px 10px;border-radius:999px;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(3,102,214,0.08);white-space:nowrap}';
-    // 保留卡片主题下的深色 chip（如果被其他区域使用）
-    echo '.typecho-page-main .linkgo-card-header .linkgo-chip{background:rgba(255,255,255,0.12);color:#fff;padding:6px 10px;border-radius:999px;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.06)}';
-        echo '.typecho-page-main .linkgo-info{margin-top:12px;padding:14px;border-radius:10px;background:#f8fbff;border:1px solid #e6f1ff;color:#0f172a}';
-        echo '.typecho-page-main .linkgo-info .title{font-weight:700;margin-bottom:8px}';
-        echo '.typecho-page-main .linkgo-success{margin-top:12px;padding:12px;border-radius:10px;background:linear-gradient(90deg,#10b981,#059669);color:#fff;font-weight:700}';
-        echo '.typecho-page-main .linkgo-md3 .description{color:var(--lg-muted);margin-bottom:8px;font-size:13px;line-height:1.6}';
-        echo '.typecho-page-main .linkgo-md3 input[type=text], .typecho-page-main .linkgo-md3 select{height: auto;width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e6eef8;background:var(--lg-surface);box-shadow:0 2px 6px rgba(59,130,246,0.06);margin-bottom:12px}';
-        echo '.typecho-page-main .linkgo-md3 .typecho-submit{background:var(--lg-primary);color:var(--lg-on-primary);border-radius:10px;padding:10px 18px;border:0;font-weight:700}';
-        echo '.typecho-page-main .linkgo-md3 .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;text-decoration:none;border:1px solid transparent;font-weight:600}';
-        echo '.typecho-page-main .linkgo-md3 .btn--primary, .typecho-page-main .linkgo-md3 .btn.btn--primary, .typecho-page-main .linkgo-md3 .linkgo-btn--primary{background:linear-gradient(90deg,var(--lg-primary),#2563eb);color:var(--lg-on-primary);border-color:rgba(37,99,235,0.12);box-shadow:0 8px 24px rgba(59,130,246,0.12)}';
-        echo '.typecho-page-main .linkgo-md3 .btn--primary:hover{filter:brightness(0.96)}';
-        echo '.typecho-page-main .linkgo-md3 .typecho-radio{display:flex;gap:12px;align-items:center;margin-bottom:12px}';
-        echo '.typecho-page-main .linkgo-md3 .typecho-radio label{margin-right:8px}';
-        // MD3 风格的 Textarea（用于白名单配置）
-        echo '.typecho-page-main .linkgo-md3 textarea{display:block;box-sizing:border-box;width:100%;min-height:180px;padding:16px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-family:"JetBrains Mono",Consolas,Monaco,monospace;font-size:13px;line-height:1.5;resize:vertical;transition:all .2s;box-shadow:0 1px 2px 0 rgba(0,0,0,0.05)}';
-        echo '.typecho-page-main .linkgo-md3 textarea:hover{border-color:#94a3b8}';
-        echo '.typecho-page-main .linkgo-md3 textarea:focus{outline:0;border-color:var(--lg-primary);box-shadow:0 0 0 4px rgba(59,130,246,0.1)}';
-    // 白名单示例区块
-    echo '.typecho-page-main .linkgo-md3 .linkgo-examples{margin-top:10px;margin-bottom:16px;padding:12px;border-radius:12px;background:#f8fbff;border:1px solid #e6f1ff}';
-    echo '.typecho-page-main .linkgo-md3 .linkgo-examples .ex-title{font-weight:800;color:var(--lg-text);margin-bottom:8px}';
-    echo '.typecho-page-main .linkgo-md3 .linkgo-examples .ex-desc{color:var(--lg-muted);font-size:13px;line-height:1.6;margin-bottom:10px}';
-    echo '.typecho-page-main .linkgo-md3 .linkgo-examples .ex-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 8px}';
-    echo '.typecho-page-main .linkgo-md3 .linkgo-examples .ex-btn{appearance:none;border:1px solid rgba(37,99,235,0.18);background:#fff;color:#1d4ed8;border-radius:999px;padding:7px 12px;font-weight:700;font-size:13px;cursor:pointer}';
-    echo '.typecho-page-main .linkgo-md3 .linkgo-examples .ex-btn:hover{background:#eff6ff}';
-    echo '.typecho-page-main .linkgo-md3 .linkgo-examples pre{margin:0;padding:12px;border-radius:12px;background:#0b1220;color:#e5e7eb;overflow:auto;line-height:1.55;font-size:12.5px}';
-    echo '.typecho-page-main .linkgo-md3 .linkgo-examples code{font-family:"JetBrains Mono",Consolas,Monaco,monospace}';
-        // 优化描述文字排版
-        echo '.typecho-page-main .linkgo-md3 .description{color:var(--lg-muted);margin-bottom:8px;font-size:13px;line-height:1.6}';
-        echo '</style>';
-
-        echo <<<'LG_PLUGIN_CONFIG_SCRIPT'
-<script>
-document.addEventListener("DOMContentLoaded", function(){
-    var f = document.querySelector(".typecho-page-main form");
-    if (f && !f.classList.contains("linkgo-md3")) { f.classList.add("linkgo-md3"); }
-        if (f && !document.querySelector(".linkgo-card-header")) {
-        var header = document.createElement("div");
-        header.className = "linkgo-card-header";
-        header.innerHTML = '<div class="left"><div class="logo">🔗</div><div><div class="title">LinkGo</div><div class="subtitle">外部链接中间跳转插件 · 安全提示页</div></div></div>';
-        f.parentNode.insertBefore(header, f);
-
-    // 在卡片 header 内插入 actions（包含同步按钮）
-    var actions = document.createElement('div');
-    actions.className = 'actions';
-    actions.innerHTML = '<a class="linkgo-chip" href="https://github.com/lhl77/Typecho-Plugin-LinkGo" target="_blank" rel="noopener noreferrer">GitHub 仓库</a><a class="linkgo-chip" href="https://blog.lhl.one/artical/949.html#主题开发" target="_blank" rel="noopener noreferrer">主题开发文档</a><a class="linkgo-chip" href="https://blog.lhl.one/artical/949.html#主题" target="_blank" rel="noopener noreferrer">更多主题</a>';
-    header.appendChild(actions);
-    }
-
-    // 在“网址白名单”文本框下方插入常见规则示例 + 复制/追加按钮
-    var whitelist = document.querySelector('textarea[name="urlWhitelist"], textarea#urlWhitelist');
-    if(whitelist && !document.querySelector('.linkgo-examples')){
-        var sample = [
-            '# 常见规则',
-            'github.com',
-            'gitee.com',
-            '',
-            '# 页脚常用',
-            'beian.miit.gov.cn',
-            'ipw.cn/ipv6webcheck',
-            'typecho.org',
-            '',
-            '# 通配符示例',
-            '*.lhl.one'
-        ].join('\n');
-
-        function copyText(text){
-            if(navigator.clipboard && navigator.clipboard.writeText){
-                return navigator.clipboard.writeText(text);
-            }
-            return new Promise(function(resolve, reject){
-                try{
-                    var ta = document.createElement('textarea');
-                    ta.value = text;
-                    ta.setAttribute('readonly', '');
-                    ta.style.position = 'fixed';
-                    ta.style.left = '-9999px';
-                    document.body.appendChild(ta);
-                    ta.select();
-                    var ok = document.execCommand('copy');
-                    document.body.removeChild(ta);
-                    ok ? resolve() : reject(new Error('copy failed'));
-                }catch(e){ reject(e); }
-            });
-        }
-
-        function toast(msg){
-            try{
-                var t = document.createElement('div');
-                t.textContent = msg;
-                t.style.position='fixed';
-                t.style.right='18px';
-                t.style.bottom='18px';
-                t.style.zIndex='99999';
-                t.style.padding='10px 12px';
-                t.style.borderRadius='12px';
-                t.style.background='rgba(15,23,42,.92)';
-                t.style.color='#fff';
-                t.style.fontSize='13px';
-                t.style.boxShadow='0 10px 30px rgba(0,0,0,.25)';
-                document.body.appendChild(t);
-                setTimeout(function(){ t.style.opacity='0'; t.style.transition='opacity .25s'; }, 1100);
-                setTimeout(function(){ if(t && t.parentNode) t.parentNode.removeChild(t); }, 1500);
-            }catch(e){}
-        }
-
-        var box = document.createElement('div');
-        box.className = 'linkgo-examples';
-        box.innerHTML = ''
-            + '<div class="ex-title">常见需求示例</div>'
-            + '<div class="ex-desc">这些规则会让命中的外链保持原样（不改写成 /go/xxx）。你可以先“复制”，或直接“追加到白名单”。</div>'
-            + '<div class="ex-actions">'
-            +   '<button type="button" class="ex-btn" data-act="copy">复制示例</button>'
-            +   '<button type="button" class="ex-btn" data-act="append">追加到白名单</button>'
-            + '</div>'
-            + '<pre><code></code></pre>';
-        box.querySelector('code').textContent = sample;
-        whitelist.insertAdjacentElement('afterend', box);
-
-        box.addEventListener('click', function(e){
-            var btn = e.target && e.target.closest ? e.target.closest('button[data-act]') : null;
-            if(!btn) return;
-
-            var act = btn.getAttribute('data-act');
-            if(act === 'copy'){
-                copyText(sample).then(function(){ toast('已复制示例规则'); }).catch(function(){ toast('复制失败，请手动复制'); });
-                return;
-            }
-
-            if(act === 'append'){
-                var cur = String(whitelist.value || '').replace(/\s+$/,'');
-                var next = cur ? (cur + '\n\n' + sample) : sample;
-                whitelist.value = next;
-                whitelist.dispatchEvent(new Event('input', {bubbles:true}));
-                toast('已追加到白名单');
-                return;
-            }
-        });
-    }
-});
-</script>
-LG_PLUGIN_CONFIG_SCRIPT;
+        // 输出 Material Design 3 设置页样式与交互（含跳转页主题预览）
+        self::renderConfigAssets(self::scanThemes());
 
         // 站点显示标题（用于跳转页）
-        $siteTitle = new Typecho_Widget_Helper_Form_Element_Text('siteTitle', null, '', _t('跳转页面站点标题'));
+        $siteTitle = new Typecho_Widget_Helper_Form_Element_Text(
+            'siteTitle',
+            null,
+            '',
+            _t('跳转页面站点标题'),
+            _t('显示在跳转提示页的站点名称；留空时使用站点标题。')
+        );
         $form->addInput($siteTitle);
 
         // Logo 图片 URL
-        $logoUrl = new Typecho_Widget_Helper_Form_Element_Text('logoUrl', null, '', _t('Logo 图片 URL'));
+        $logoUrl = new Typecho_Widget_Helper_Form_Element_Text(
+            'logoUrl',
+            null,
+            '',
+            _t('Logo 图片 URL'),
+            _t('推荐使用正方形图片（PNG/SVG），留空时使用插件内置图标。')
+        );
         $form->addInput($logoUrl);
 
         // 起始年份
-        $startYear = new Typecho_Widget_Helper_Form_Element_Text('startYear', null, '2026', _t('起始年份（页脚）'));
+        $startYear = new Typecho_Widget_Helper_Form_Element_Text(
+            'startYear',
+            null,
+            '2026',
+            _t('起始年份（页脚）'),
+            _t('页脚显示为「起始年份 - 当前年份」，与当前年份相同时只显示一个年份。')
+        );
         $form->addInput($startYear);
 
         // 主题选择：扫描插件目录下的 page/themes 子目录作为可选主题
-        $themeOptions = array();
-        try {
-            $themeDir = __DIR__ . '/page/themes';
-            if (is_dir($themeDir)) {
-                $items = scandir($themeDir);
-                foreach ($items as $it) {
-                    if ($it === '.' || $it === '..')
-                        continue;
-                    if (is_dir($themeDir . DIRECTORY_SEPARATOR . $it)) {
-                        $themeOptions[$it] = $it;
-                    }
-                }
-            }
-        } catch (Exception $e) {
-            $themeOptions = array();
-        }
-        if (empty($themeOptions)) {
-            $themeOptions = array('Default' => 'Default');
-        }
-        $themeName = new Typecho_Widget_Helper_Form_Element_Select('themeName', $themeOptions, 'Default', _t('跳转页主题'));
+        $themeOptions = self::scanThemes();
+        $themeName = new Typecho_Widget_Helper_Form_Element_Select(
+            'themeName',
+            $themeOptions,
+            'Default',
+            _t('跳转页主题'),
+            _t('跳转提示页使用的外观模板；可在右侧「主题预览」中实时查看效果。')
+        );
         $form->addInput($themeName);
+
+        // 主题色（十六进制；留空跟随主题默认）
+        $themeColor = new Typecho_Widget_Helper_Form_Element_Text(
+            'themeColor',
+            null,
+            '',
+            _t('主题色'),
+            _t('十六进制颜色，留空则保留主题默认主题色。')
+        );
+        if (method_exists($themeColor, 'setInputsAttribute')) {
+            $themeColor->setInputsAttribute('maxlength', '7');
+        }
+        $form->addInput($themeColor);
 
         // 外部链接是否在新标签打开
         $openNew = new Typecho_Widget_Helper_Form_Element_Radio(
             'openInNewTab',
             array('1' => '是（_blank）', '0' => '否（当前窗口）'),
             '1',
-            _t('外部链接打开方式')
+            _t('外部链接打开方式'),
+            _t('控制站点内被改写的外链是否在新标签页中打开。')
         );
         $form->addInput($openNew);
 
@@ -299,7 +167,8 @@ LG_PLUGIN_CONFIG_SCRIPT;
             'enableClientRewrite',
             array('1' => '是（推荐）', '0' => '否'),
             '1',
-            _t('AJAX兼容（当主题使用 AJAX 时推荐开启）')
+            _t('AJAX 兼容'),
+            _t('主题使用 AJAX / 客户端渲染时，由前端脚本继续改写动态插入的外链，推荐保持开启。')
         );
         $form->addInput($enableClient);
 
@@ -311,6 +180,100 @@ LG_PLUGIN_CONFIG_SCRIPT;
             _t('启用后，如果外链 URL 与 Links 插件中已启用的友链 URL 相同，LinkGo 将保持原链接，不改写成 /go/xxx。')
         );
         $form->addInput($skipLinksPluginUrls);
+
+        // —— <a> 标签高级设置 ——
+        $linkRelMode = new Typecho_Widget_Helper_Form_Element_Select(
+            'linkRelMode',
+            array(
+                'noopener noreferrer' => 'noopener noreferrer（默认）',
+                'nofollow noopener noreferrer' => 'nofollow noopener noreferrer',
+                'sponsored nofollow noopener noreferrer' => 'sponsored nofollow noopener noreferrer',
+                'noopener' => 'noopener',
+                'none' => '不添加 rel',
+            ),
+            'noopener noreferrer',
+            _t('外链 rel 属性'),
+            _t('改写后的外链会合并该 rel 值（保留作者原有的 rel）。nofollow / sponsored 会影响 SEO 权重传递，请按站点策略选择。')
+        );
+        $form->addInput($linkRelMode);
+
+        $linkTitleMode = new Typecho_Widget_Helper_Form_Element_Select(
+            'linkTitleMode',
+            array(
+                'host' => '目标域名（默认）',
+                'full' => '完整链接',
+                'none' => '不添加',
+            ),
+            'host',
+            _t('外链 title 提示'),
+            _t('为改写后的外链补充 title 属性（鼠标悬停提示）；作者已写 title 时不覆盖。')
+        );
+        $form->addInput($linkTitleMode);
+
+        $linkClassName = new Typecho_Widget_Helper_Form_Element_Text(
+            'linkClassName',
+            null,
+            '',
+            _t('附加 CSS 类名'),
+            _t('为改写后的外链追加 class，便于主题命中样式或做统计；留空不添加，多个类名用空格分隔。')
+        );
+        if (method_exists($linkClassName, 'setInputsAttribute')) {
+            $linkClassName->setInputsAttribute('placeholder', '例如：external-link linkgo-out');
+        }
+        $form->addInput($linkClassName);
+
+        $addDataAttr = new Typecho_Widget_Helper_Form_Element_Radio(
+            'addDataAttr',
+            array('1' => '是（默认）', '0' => '否'),
+            '1',
+            _t('添加 data-linkgo 标记'),
+            _t('为改写后的外链添加 data-linkgo="1"，便于前端脚本 / 统计脚本识别。')
+        );
+        $form->addInput($addDataAttr);
+
+        // 目标链接显示方式
+        $showFullUrl = new Typecho_Widget_Helper_Form_Element_Radio(
+            'showFullUrl',
+            array('1' => '完整链接', '0' => '仅域名'),
+            '1',
+            _t('目标链接显示方式'),
+            _t('跳转页展示目标地址时，是显示完整 URL 还是只显示域名。')
+        );
+        $form->addInput($showFullUrl);
+
+        // 是否显示站点 Logo
+        $showLogo = new Typecho_Widget_Helper_Form_Element_Radio(
+            'showLogo',
+            array('1' => '显示', '0' => '隐藏'),
+            '1',
+            _t('显示站点 Logo'),
+            _t('关闭后跳转页不再显示站点 Logo（部分主题本身不含 Logo，此项对其无效）。')
+        );
+        $form->addInput($showLogo);
+
+        // —— SEO 设置 ——
+        $robotsPolicy = new Typecho_Widget_Helper_Form_Element_Select(
+            'robotsPolicy',
+            array(
+                'noindex, nofollow' => 'noindex, nofollow（默认）',
+                'noindex, follow' => 'noindex, follow',
+                'noindex' => 'noindex',
+                'none' => '不输出 robots meta',
+            ),
+            'noindex, nofollow',
+            _t('跳转页 robots'),
+            _t('控制跳转提示页的 robots meta（防止中间页被搜索引擎收录）。')
+        );
+        $form->addInput($robotsPolicy);
+
+        $sendNoindexHeader = new Typecho_Widget_Helper_Form_Element_Radio(
+            'sendNoindexHeader',
+            array('1' => '是（默认）', '0' => '否'),
+            '1',
+            _t('发送 X-Robots-Tag 响应头'),
+            _t('跳转页会额外发送 X-Robots-Tag: noindex, nofollow，与 meta 双保险。')
+        );
+        $form->addInput($sendNoindexHeader);
         
         // 网址白名单
         // Typecho 的表单 textarea 元素在不同版本/提示文件中可能存在命名差异，这里做一个兼容兜底
@@ -338,13 +301,1036 @@ LG_PLUGIN_CONFIG_SCRIPT;
             )
         );
         // 尝试为 textarea 增加 placeholder（Typecho 不同版本的元素实现差异较大，这里做兼容兜底）
-        if (method_exists($whitelist, 'setAttribute')) {
-            $whitelist->setAttribute('placeholder', "# 示例：每行一条\nexample.com\n*.example.com\nexample.com/path/\nhttps://icp.redcha.cn/beian/\n# 精准（含 query）\nhttps://example.com/page?id=1");
-        } elseif (property_exists($whitelist, 'input') && is_array($whitelist->input)) {
-            $whitelist->input['placeholder'] = "# 示例：每行一条\nexample.com\n*.example.com\nexample.com/path/\nhttps://icp.redcha.cn/beian/\n# 精准（含 query）\nhttps://example.com/page?id=1";
+        $placeholder = "# 示例：每行一条\nexample.com\n*.example.com\nexample.com/path/\nhttps://icp.redcha.cn/beian/\n# 精准（含 query）\nhttps://example.com/page?id=1";
+        if (method_exists($whitelist, 'setInputsAttribute')) {
+            $whitelist->setInputsAttribute('placeholder', $placeholder);
+        } elseif (!empty($whitelist->input) && method_exists($whitelist->input, 'setAttribute')) {
+            $whitelist->input->setAttribute('placeholder', $placeholder);
         }
         $form->addInput($whitelist);
 
+    }
+
+    /**
+     * 扫描 page/themes 下的可用主题（要求存在 template.php）。
+     *
+     * @return array<string, string>
+     */
+    private static function scanThemes()
+    {
+        $themes = array();
+        $dir = __DIR__ . '/page/themes';
+
+        if (is_dir($dir)) {
+            $items = @scandir($dir);
+            if (is_array($items)) {
+                foreach ($items as $item) {
+                    if ($item === '.' || $item === '..') {
+                        continue;
+                    }
+                    if (is_dir($dir . '/' . $item) && is_file($dir . '/' . $item . '/template.php')) {
+                        $themes[$item] = $item;
+                    }
+                }
+            }
+        }
+
+        if (isset($themes['Default'])) {
+            $default = $themes['Default'];
+            unset($themes['Default']);
+            $themes = array('Default' => $default) + $themes;
+        }
+
+        if (empty($themes)) {
+            $themes = array('Default' => 'Default');
+        }
+
+        return $themes;
+    }
+
+    /**
+     * 主题强调色（用于设置页预览选择器上的色点）。
+     */
+    private static function getThemeAccent($name)
+    {
+        $mapFile = __DIR__ . '/page/theme-accents.php';
+        $map = is_file($mapFile) ? include $mapFile : array();
+        if (!is_array($map)) {
+            $map = array();
+        }
+
+        if (isset($map[$name])) {
+            return $map[$name];
+        }
+
+        $hue = abs(crc32((string)$name)) % 360;
+        return 'hsl(' . $hue . ', 62%, 48%)';
+    }
+
+    /**
+     * 站点根地址（不含末尾斜杠），用于生成主题预览地址。
+     */
+    private static function getSiteBaseUrl()
+    {
+        try {
+            $options = Typecho_Widget::widget('Widget_Options');
+            $siteUrl = rtrim((string)$options->siteUrl, '/');
+            if ($siteUrl !== '') {
+                return $siteUrl;
+            }
+        } catch (Exception $e) {
+            // ignore
+        } catch (Throwable $e) {
+            // ignore
+        }
+
+        return '';
+    }
+
+    /**
+     * 输出设置页的 Material Design 3 样式与交互脚本（含跳转页主题预览）。
+     *
+     * @param array<string, string> $themeOptions
+     */
+    private static function renderConfigAssets(array $themeOptions)
+    {
+        $themes = array();
+        foreach ($themeOptions as $name => $label) {
+            $themes[] = array(
+                'name' => (string)$name,
+                'accent' => self::getThemeAccent((string)$name),
+            );
+        }
+
+        $themesJson = json_encode($themes, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        if (!is_string($themesJson) || $themesJson === '') {
+            $themesJson = '[]';
+        }
+
+        $siteBase = self::getSiteBaseUrl();
+        $previewBase = $siteBase !== '' ? $siteBase . '/go/preview' : '';
+
+        echo <<<'LG_CSS'
+<style id="linkgo-md3-style">
+/* ============================================================
+   LinkGo 设置页 · Material Design 3
+   颜色令牌全部复用 AdminBeautify 的 --md-*；
+   AB 未启用时回退到 MD3 亮色基线（不跟随操作系统暗色）。
+   ============================================================ */
+.linkgo-page{
+    --lg-primary:var(--md-primary,#6750A4);
+    --lg-on-primary:var(--md-on-primary,#FFFFFF);
+    --lg-primary-container:var(--md-primary-container,#EADDFF);
+    --lg-on-primary-container:var(--md-on-primary-container,#21005D);
+    --lg-secondary-container:var(--md-secondary-container,#E8DEF8);
+    --lg-on-secondary-container:var(--md-on-secondary-container,#1D192B);
+    --lg-surface:var(--md-surface,#FEF7FF);
+    --lg-surface-lowest:var(--md-surface-container-lowest,#FFFFFF);
+    --lg-surface-low:var(--md-surface-container-low,#F7F2FA);
+    --lg-surface-container:var(--md-surface-container,#F3EDF7);
+    --lg-surface-high:var(--md-surface-container-high,#ECE6F0);
+    --lg-surface-highest:var(--md-surface-container-highest,#E6E0E9);
+    --lg-on-surface:var(--md-on-surface,#1D1B20);
+    --lg-on-surface-variant:var(--md-on-surface-variant,#49454F);
+    --lg-outline:var(--md-outline,#79747E);
+    --lg-outline-variant:var(--md-outline-variant,#CAC4D0);
+    --lg-error:var(--md-error,#B3261E);
+    --lg-r-sm:var(--md-radius-md,12px);
+    --lg-r-md:var(--md-radius-lg,16px);
+    --lg-r-lg:var(--md-radius-xl,24px);
+    --lg-r-xl:var(--md-radius-xl,28px);
+    --lg-elev-1:var(--md-elevation-1,0 1px 2px rgba(0,0,0,.10),0 1px 3px 1px rgba(0,0,0,.06));
+    --lg-elev-2:var(--md-elevation-2,0 2px 6px 2px rgba(0,0,0,.10),0 1px 2px rgba(0,0,0,.12));
+    font-family:inherit;
+}
+
+/* Typecho 1.3 的栅格是 flex：必须同时覆盖 flex-basis 与 max-width，否则只到 8 列 */
+.linkgo-page>[class*="col-"]{
+    flex:0 0 100%!important;
+    max-width:100%!important;
+    width:100%!important;
+    margin-left:0!important;
+    float:none!important;
+}
+.linkgo-page .lg-shell{max-width:1160px;margin:8px auto 40px;display:flex;flex-direction:column;gap:20px}
+.linkgo-page .lg-card h1,.linkgo-page .lg-card h2,.linkgo-page .lg-card h3{font-family:inherit}
+
+/* --- Hero --- */
+.linkgo-page .lg-hero{
+    position:relative;overflow:hidden;
+    display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+    padding:22px 24px;border-radius:var(--lg-r-xl);
+    background:
+        radial-gradient(120% 180% at 0% 0%,color-mix(in srgb,var(--lg-primary) 20%,transparent) 0%,transparent 55%),
+        var(--lg-surface-low);
+    border:1px solid var(--lg-outline-variant);
+}
+.linkgo-page .lg-hero__logo{
+    flex:0 0 62px;width:62px;height:62px;border-radius:18px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--lg-primary-container);color:var(--lg-on-primary-container);
+    box-shadow:var(--lg-elev-1);
+}
+.linkgo-page .lg-hero__logo svg{width:32px;height:32px}
+.linkgo-page .lg-hero__text{flex:1 1 200px;min-width:0}
+.linkgo-page .lg-hero__title{display:flex;align-items:center;gap:10px;margin:0;font-size:22px;font-weight:700;letter-spacing:.2px;color:var(--lg-on-surface)}
+.linkgo-page .lg-hero__version{
+    font-size:11px;font-weight:600;line-height:1;letter-spacing:.4px;
+    padding:5px 9px;border-radius:100px;
+    background:var(--lg-secondary-container);color:var(--lg-on-secondary-container);
+}
+.linkgo-page .lg-hero__sub{margin:6px 0 0;font-size:13px;line-height:1.6;color:var(--lg-on-surface-variant)}
+.linkgo-page .lg-hero__actions{display:flex;gap:8px;flex-wrap:wrap}
+.linkgo-page .lg-chip{
+    display:inline-flex;align-items:center;gap:7px;
+    height:34px;padding:0 14px;border-radius:100px;
+    border:1px solid var(--lg-outline);
+    background:transparent;color:var(--lg-on-surface);
+    font-size:13px;font-weight:500;text-decoration:none!important;
+    transition:background .18s ease;
+}
+.linkgo-page .lg-chip:hover{background:color-mix(in srgb,var(--lg-on-surface) 8%,transparent);color:var(--lg-on-surface);text-decoration:none!important}
+.linkgo-page .lg-chip svg{width:16px;height:16px;opacity:.8}
+
+/* --- Layout --- */
+.linkgo-page .lg-layout{display:grid;grid-template-columns:minmax(0,.9fr) minmax(420px,1.1fr);gap:20px;align-items:start}
+@media (max-width:1120px){.linkgo-page .lg-layout{grid-template-columns:minmax(0,1fr)}}
+.linkgo-page .lg-main{min-width:0}
+.linkgo-page .lg-aside{min-width:0}
+
+/* --- Cards --- */
+.linkgo-page .lg-card{
+    position:relative;
+    padding:20px 22px;
+    border-radius:var(--lg-r-lg);
+    background:var(--lg-surface-low);
+    border:1px solid var(--lg-outline-variant);
+    box-shadow:var(--lg-elev-1);
+}
+.linkgo-page .lg-card+.lg-card{margin-top:16px}
+.linkgo-page .lg-card__head{display:flex;align-items:flex-start;gap:14px;margin-bottom:6px}
+.linkgo-page .lg-card__icon{
+    flex:0 0 40px;width:40px;height:40px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--lg-secondary-container);color:var(--lg-on-secondary-container);
+}
+.linkgo-page .lg-card__icon svg{width:20px;height:20px}
+.linkgo-page .lg-card__title{font-size:15px;font-weight:600;line-height:1.4;color:var(--lg-on-surface)}
+.linkgo-page .lg-card__desc{margin-top:3px;font-size:12.5px;line-height:1.55;color:var(--lg-on-surface-variant)}
+.linkgo-page .lg-card__body{margin-top:14px}
+
+/* --- Fields --- */
+.linkgo-page .lg-main ul.typecho-option{
+    margin:0!important;padding:0!important;list-style:none!important;
+    background:transparent!important;border:0!important;box-shadow:none!important;
+}
+.linkgo-page .lg-main ul.typecho-option li{margin:0 0 26px!important;padding:0!important}
+.linkgo-page .lg-main .lg-card__body>ul.typecho-option:last-of-type li{margin-bottom:0!important}
+.linkgo-page .lg-main .typecho-label{
+    display:block!important;margin:0 0 8px!important;
+    font-size:13px!important;font-weight:600!important;color:var(--lg-on-surface-variant)!important;
+}
+.linkgo-page .lg-main ul.typecho-option .description{
+    margin:8px 0 0!important;padding:0!important;
+    font-size:12.5px!important;line-height:1.65!important;color:var(--lg-on-surface-variant)!important;
+}
+.linkgo-page .lg-main ul.typecho-option .description code{
+    padding:1px 5px;border-radius:6px;font-size:12px;
+    background:var(--lg-surface-high);color:var(--lg-on-surface);
+    font-family:"JetBrains Mono",Consolas,Monaco,monospace;
+}
+
+/* 文本 / 下拉：MD3 filled field */
+.linkgo-page .lg-main input[type=text],
+.linkgo-page .lg-main input[type=url],
+.linkgo-page .lg-main select{
+    display:block!important;box-sizing:border-box!important;width:100%!important;
+    min-height:56px!important;height:auto!important;margin:0!important;
+    padding:16px 16px 15px!important;
+    border:0!important;border-bottom:1px solid var(--lg-on-surface-variant)!important;
+    border-radius:var(--lg-r-sm) var(--lg-r-sm) 0 0!important;
+    background:var(--lg-surface-highest)!important;
+    color:var(--lg-on-surface)!important;
+    font-size:14px!important;line-height:1.5!important;
+    box-shadow:none!important;
+    transition:background .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.linkgo-page .lg-main input[type=text]:hover,
+.linkgo-page .lg-main input[type=url]:hover,
+.linkgo-page .lg-main select:hover{
+    background:color-mix(in srgb,var(--lg-on-surface) 7%,var(--lg-surface-highest))!important;
+}
+.linkgo-page .lg-main input[type=text]:focus,
+.linkgo-page .lg-main input[type=url]:focus,
+.linkgo-page .lg-main select:focus{
+    outline:none!important;
+    border-bottom:2px solid var(--lg-primary)!important;
+    padding-bottom:14px!important;
+    box-shadow:none!important;
+}
+.linkgo-page .lg-main select{
+    appearance:auto;-webkit-appearance:auto;
+    padding-right:40px!important;
+}
+
+/* 主题色：文本 + 原生取色器 */
+.linkgo-page .lg-color-field{display:flex;align-items:center;gap:10px}
+.linkgo-page .lg-color-field input[type=text]{flex:1 1 auto;min-width:0}
+.linkgo-page .lg-color-picker{
+    flex:0 0 56px;width:56px!important;height:56px!important;padding:5px!important;
+    border:1px solid var(--lg-outline-variant)!important;border-radius:12px!important;
+    background:var(--lg-surface-highest)!important;cursor:pointer;
+}
+.linkgo-page .lg-color-picker::-webkit-color-swatch-wrapper{padding:0}
+.linkgo-page .lg-color-picker::-webkit-color-swatch{border:0;border-radius:8px}
+.linkgo-page .lg-color-picker::-moz-color-swatch{border:0;border-radius:8px}
+
+/* 白名单：代码风的大输入框 */
+.linkgo-page .lg-main textarea{
+    display:block!important;box-sizing:border-box!important;width:100%!important;
+    min-height:250px!important;margin:0!important;padding:16px!important;
+    border:1px solid var(--lg-outline-variant)!important;
+    border-radius:var(--lg-r-md)!important;
+    background:var(--lg-surface-lowest)!important;
+    color:var(--lg-on-surface)!important;
+    font-family:"JetBrains Mono",Consolas,Monaco,"Courier New",monospace!important;
+    font-size:12.5px!important;line-height:1.7!important;
+    box-shadow:none!important;resize:vertical;
+    transition:border-color .18s ease,box-shadow .18s ease;
+}
+.linkgo-page .lg-main textarea:hover{border-color:var(--lg-outline)!important}
+.linkgo-page .lg-main textarea:focus{
+    outline:none!important;
+    border-color:var(--lg-primary)!important;
+    box-shadow:0 0 0 2px color-mix(in srgb,var(--lg-primary) 22%,transparent)!important;
+}
+.linkgo-page .lg-main textarea::placeholder{color:var(--lg-on-surface-variant);opacity:.7}
+
+/* --- 单选：MD3 choice chip --- */
+.linkgo-page .lg-choice{
+    display:inline-flex!important;align-items:center;gap:10px;
+    margin:0 8px 10px 0!important;padding:10px 16px 10px 12px!important;
+    border:1px solid var(--lg-outline)!important;
+    border-radius:100px!important;
+    background:transparent!important;
+    color:var(--lg-on-surface)!important;
+    line-height:1.2!important;cursor:pointer;
+    transition:background .18s ease,border-color .18s ease,color .18s ease;
+}
+.linkgo-page .lg-choice:hover{background:color-mix(in srgb,var(--lg-on-surface) 8%,transparent)!important}
+.linkgo-page .lg-choice.is-checked{
+    background:var(--lg-secondary-container)!important;
+    border-color:transparent!important;
+    color:var(--lg-on-secondary-container)!important;
+}
+.linkgo-page .lg-choice input[type=radio]{
+    appearance:none;-webkit-appearance:none;
+    flex:0 0 20px;width:20px!important;height:20px!important;
+    margin:0!important;padding:0!important;
+    border:2px solid var(--lg-on-surface-variant)!important;
+    border-radius:50%!important;background:transparent!important;
+    position:relative;cursor:pointer;
+    box-shadow:none!important;
+}
+.linkgo-page .lg-choice input[type=radio]:checked{border-color:var(--lg-primary)!important}
+.linkgo-page .lg-choice.is-checked input[type=radio]{border-color:var(--lg-primary)!important}
+.linkgo-page .lg-choice input[type=radio]:checked::after{
+    content:"";position:absolute;inset:3px;border-radius:50%;background:var(--lg-primary);
+}
+.linkgo-page .lg-choice label{
+    margin:0!important;font-size:13.5px!important;font-weight:500!important;
+    color:inherit!important;cursor:pointer;
+}
+
+/* --- 白名单示例 --- */
+.linkgo-page .lg-examples{
+    margin-top:14px;padding:16px;
+    border-radius:var(--lg-r-md);
+    background:var(--lg-surface-container);
+    border:1px dashed var(--lg-outline-variant);
+}
+.linkgo-page .lg-examples .ex-title{font-size:13.5px;font-weight:600;color:var(--lg-on-surface)}
+.linkgo-page .lg-examples .ex-desc{margin-top:4px;font-size:12.5px;line-height:1.6;color:var(--lg-on-surface-variant)}
+.linkgo-page .lg-examples .ex-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 10px}
+.linkgo-page .lg-examples .ex-btn{
+    appearance:none;cursor:pointer;
+    height:32px;padding:0 14px;border-radius:100px;
+    border:1px solid var(--lg-outline);
+    background:transparent;color:var(--lg-primary);
+    font-size:12.5px;font-weight:600;
+    transition:background .18s ease;
+}
+.linkgo-page .lg-examples .ex-btn:hover{background:color-mix(in srgb,var(--lg-primary) 10%,transparent)}
+.linkgo-page .lg-examples pre{
+    margin:0;padding:14px;border-radius:var(--lg-r-sm);
+    background:var(--lg-surface-lowest);border:1px solid var(--lg-outline-variant);
+    color:var(--lg-on-surface);overflow:auto;
+    font-size:12px;line-height:1.7;
+}
+.linkgo-page .lg-examples code{font-family:"JetBrains Mono",Consolas,Monaco,monospace;background:transparent;padding:0}
+
+/* --- 规则说明折叠面板 --- */
+.linkgo-page .lg-help{
+    margin-top:12px;border:1px solid var(--lg-outline-variant);
+    border-radius:var(--lg-r-sm);background:var(--lg-surface-container);
+    overflow:hidden;
+}
+.linkgo-page .lg-help>summary{
+    display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;
+    padding:12px 14px;font-size:12.5px;font-weight:600;color:var(--lg-on-surface);
+}
+.linkgo-page .lg-help>summary::-webkit-details-marker{display:none}
+.linkgo-page .lg-help>summary::before{
+    content:"";width:6px;height:6px;margin-right:2px;
+    border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;
+    transform:rotate(-45deg);opacity:.7;transition:transform .2s ease;
+}
+.linkgo-page .lg-help[open]>summary::before{transform:rotate(45deg)}
+.linkgo-page .lg-help__body{
+    padding:0 14px 14px;font-size:12.5px;line-height:1.75;
+    color:var(--lg-on-surface-variant);
+}
+.linkgo-page .lg-help__body b{color:var(--lg-on-surface)}
+.linkgo-page .lg-help__body code{
+    padding:1px 5px;border-radius:6px;font-size:12px;
+    background:var(--lg-surface-high);color:var(--lg-on-surface);
+    font-family:"JetBrains Mono",Consolas,Monaco,monospace;
+}
+
+/* --- 保存动作条 --- */
+.linkgo-page .lg-actions{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    margin-top:18px;padding:12px 16px;
+    border-radius:20px;
+    background:color-mix(in srgb,var(--lg-surface-high) 86%,transparent);
+    border:1px solid var(--lg-outline-variant);
+    box-shadow:var(--lg-elev-1);
+}
+.linkgo-page .lg-actions__hint{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--lg-on-surface-variant)}
+.linkgo-page .lg-actions__hint svg{width:16px;height:16px;opacity:.75}
+.linkgo-page .lg-actions ul.typecho-option{margin:0!important;padding:0!important;background:transparent!important;border:0!important}
+.linkgo-page .lg-actions ul.typecho-option li{margin:0!important;padding:0!important}
+.linkgo-page .lg-actions input[type=submit],
+.linkgo-page .lg-actions button[type=submit],
+.linkgo-page .lg-actions .btn.primary{
+    appearance:none!important;cursor:pointer;
+    height:44px!important;padding:0 26px!important;
+    border:0!important;border-radius:100px!important;
+    background:var(--lg-primary)!important;color:var(--lg-on-primary)!important;
+    font-size:14px!important;font-weight:600!important;letter-spacing:.2px;
+    box-shadow:var(--lg-elev-1);
+    transition:box-shadow .18s ease,transform .18s ease;
+}
+.linkgo-page .lg-actions input[type=submit]:hover,
+.linkgo-page .lg-actions button[type=submit]:hover,
+.linkgo-page .lg-actions .btn.primary:hover{
+    box-shadow:var(--lg-elev-2);transform:translateY(-1px);
+}
+
+/* --- 主题预览 --- */
+.linkgo-page .lg-preview-card{position:sticky;top:76px}
+@media (max-width:1023px){.linkgo-page .lg-preview-card{position:static}}
+.linkgo-page .lg-themes{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.linkgo-page .lg-theme{
+    appearance:none;cursor:pointer;
+    display:inline-flex;align-items:center;gap:7px;
+    height:32px;padding:0 13px;border-radius:100px;
+    border:1px solid var(--lg-outline-variant);
+    background:var(--lg-surface-lowest);color:var(--lg-on-surface);
+    font-size:12.5px;font-weight:500;
+    transition:background .18s ease,border-color .18s ease;
+}
+.linkgo-page .lg-theme:hover{background:color-mix(in srgb,var(--lg-on-surface) 6%,var(--lg-surface-lowest))}
+.linkgo-page .lg-theme.is-active{
+    background:var(--lg-secondary-container);border-color:transparent;
+    color:var(--lg-on-secondary-container);font-weight:600;
+}
+.linkgo-page .lg-theme__dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 2px color-mix(in srgb,#fff 60%,transparent)}
+.linkgo-page .lg-preview-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.linkgo-page .lg-preview-name{font-size:12.5px;color:var(--lg-on-surface-variant)}
+.linkgo-page .lg-seg{display:inline-flex;padding:3px;border-radius:100px;background:var(--lg-surface-high);gap:2px}
+.linkgo-page .lg-seg__btn{
+    appearance:none;cursor:pointer;border:0;background:transparent;
+    height:28px;padding:0 13px;border-radius:100px;
+    font-size:12px;font-weight:600;color:var(--lg-on-surface-variant);
+    transition:background .18s ease,color .18s ease;
+}
+.linkgo-page .lg-seg__btn.is-active{background:var(--lg-surface-lowest);color:var(--lg-on-surface);box-shadow:var(--lg-elev-1)}
+.linkgo-page .lg-frame{
+    --lg-preview-scale:.36;
+    position:relative;
+    aspect-ratio:1280/800;
+    border-radius:20px;overflow:hidden;
+    border:1px solid var(--lg-outline-variant);
+    background:var(--lg-surface-container);
+    transition:background .2s ease;
+}
+.linkgo-page .lg-frame__stage{
+    position:absolute;left:0;top:0;
+    width:1280px;height:800px;
+    transform:scale(var(--lg-preview-scale));
+    transform-origin:top left;
+    will-change:transform;
+}
+.linkgo-page .lg-frame__iframe{display:block;width:1280px;height:800px;border:0;background:#fff}
+.linkgo-page .lg-frame.is-mobile{
+    aspect-ratio:auto;height:600px;
+    display:flex;justify-content:center;padding:14px;
+    background:var(--lg-surface-high);
+}
+.linkgo-page .lg-frame.is-mobile .lg-frame__stage{position:static;width:auto;height:100%;transform:none}
+.linkgo-page .lg-frame.is-mobile .lg-frame__iframe{
+    width:390px;max-width:100%;height:100%;border-radius:24px;
+    border:1px solid var(--lg-outline);
+    box-shadow:0 10px 28px rgba(0,0,0,.16);
+}
+.linkgo-page .lg-frame__loading{
+    position:absolute;inset:0;z-index:2;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    background:var(--lg-surface-container);
+    color:var(--lg-on-surface-variant);font-size:13px;
+}
+.linkgo-page .lg-spinner{
+    width:18px;height:18px;border-radius:50%;
+    border:2px solid color-mix(in srgb,var(--lg-primary) 25%,transparent);
+    border-top-color:var(--lg-primary);
+    animation:lg-spin .8s linear infinite;
+}
+@keyframes lg-spin{to{transform:rotate(360deg)}}
+.linkgo-page .lg-preview-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.linkgo-page .lg-preview-tip{font-size:12px;color:var(--lg-on-surface-variant)}
+.linkgo-page .lg-text-btn{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12.5px;font-weight:600;color:var(--lg-primary);
+    text-decoration:none!important;border-radius:8px;padding:4px 6px;
+}
+.linkgo-page .lg-text-btn:hover{background:color-mix(in srgb,var(--lg-primary) 10%,transparent);color:var(--lg-primary)}
+.linkgo-page .lg-text-btn svg{width:15px;height:15px}
+
+/* 小屏 */
+@media (max-width:640px){
+    .linkgo-page .lg-hero{padding:18px;border-radius:22px}
+    .linkgo-page .lg-card{padding:16px;border-radius:20px}
+    .linkgo-page .lg-frame{height:480px}
+}
+@media (prefers-reduced-motion:reduce){
+    .linkgo-page *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+LG_CSS;
+
+        $script = <<<'LG_JS'
+<script>
+(function () {
+    var THEMES = __LINKGO_THEMES_JSON__;
+    var PREVIEW_BASE = __LINKGO_PREVIEW_BASE__;
+
+    function ico(paths, size) {
+        return '<svg viewBox="0 0 24 24" width="' + (size || 20) + '" height="' + (size || 20) + '" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + '</svg>';
+    }
+
+    var ICONS = {
+        link: ico('<path d="M10 13a5 5 0 0 0 7.07 0l1.66-1.66a5 5 0 0 0-7.07-7.07L10.5 5.43"/><path d="M14 11a5 5 0 0 0-7.07 0L5.27 12.66a5 5 0 0 0 7.07 7.07l1.16-1.16"/>', 32),
+        palette: ico('<path d="M9.5 14.5 3 21l6.5-1.5"/><path d="M14 6.5 17.5 3 21 6.5 17.5 10"/><path d="m14 6.5 3.5 3.5L9.5 18a3.5 3.5 0 0 1-4.95-4.95Z"/>'),
+        tune: ico('<path d="M4 6h9"/><path d="M17 6h3"/><circle cx="15" cy="6" r="2"/><path d="M4 12h3"/><path d="M11 12h9"/><circle cx="9" cy="12" r="2"/><path d="M4 18h9"/><path d="M17 18h3"/><circle cx="15" cy="18" r="2"/>'),
+        rule: ico('<path d="M9 6h11"/><path d="M4 6h1.5"/><path d="M9 12h11"/><path d="M4 12h1.5"/><path d="M9 18h11"/><path d="M4 18h1.5"/>'),
+        monitor: ico('<rect x="3" y="4" width="18" height="13" rx="2.5"/><path d="M8 21h8"/><path d="M12 17v4"/>'),
+        external: ico('<path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/>', 15),
+        shield: ico('<path d="M12 3 5 6v5c0 4.6 3 8.4 7 10 4-1.6 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/>', 16),
+        github: ico('<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 4.6-1.9 4.6-5.1a4 4 0 0 0-1.1-2.8 3.7 3.7 0 0 0-.1-2.8s-1.2-.4-3.9 1.5a13 13 0 0 0-6.8 0C4.1 3.4 2.9 3.8 2.9 3.8a3.7 3.7 0 0 0-.1 2.8A4 4 0 0 0 1.7 9.4c0 3.2 1.6 5.1 4.6 5.1a4.8 4.8 0 0 0-1 3.5v4"/><path d="M9 19c-3 .8-3-1.5-4-2"/>', 16),
+        book: ico('<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5V5.5Z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/>', 16)
+    };
+
+    var SECTIONS = [
+        {icon: ICONS.palette, title: '跳转页外观', desc: '设置提示页的站点标题、Logo、页脚年份、主题与主题色。', fields: ['siteTitle', 'logoUrl', 'startYear', 'themeName', 'themeColor']},
+        {icon: ICONS.tune, title: '跳转行为', desc: '控制外链改写方式、&lt;a&gt; 标签属性与跳转页 SEO。', fields: ['openInNewTab', 'enableClientRewrite', 'skipLinksPluginUrls', 'linkRelMode', 'linkTitleMode', 'linkClassName', 'addDataAttr', 'showFullUrl', 'showLogo', 'robotsPolicy', 'sendNoindexHeader']},
+        {icon: ICONS.rule, title: '网址白名单', desc: '命中规则的外链保持原样，不会被改写成 /go/ 跳转地址。', fields: ['urlWhitelist']}
+    ];
+
+    function ready(fn) {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fn);
+        } else {
+            fn();
+        }
+    }
+
+    ready(function () {
+        var page = document.querySelector('.typecho-page-main');
+        if (!page) { return; }
+
+        var form = page.querySelector('form');
+        if (!form) { return; }
+
+        page.classList.add('linkgo-page');
+        form.classList.add('lg-form');
+
+        // 让设置页占满内容区（Typecho 栅格是 flex，必须内联 !important 才能盖过 8 列限制）
+        Array.prototype.forEach.call(page.children, function (child) {
+            if (!child || !child.classList) { return; }
+            if (/(^|\s)col-/.test(child.className)) {
+                child.style.setProperty('width', '100%', 'important');
+                child.style.setProperty('max-width', '100%', 'important');
+                child.style.setProperty('flex', '0 0 100%', 'important');
+                child.style.setProperty('margin-left', '0', 'important');
+                child.style.setProperty('float', 'none', 'important');
+            }
+        });
+
+        /* 1) 收集字段 */
+        var fields = {};
+        var submitUl = null;
+        Array.prototype.forEach.call(form.querySelectorAll('ul.typecho-option'), function (ul) {
+            if (ul.querySelector('input[type=submit],button[type=submit]')) {
+                submitUl = ul;
+                return;
+            }
+            var named = ul.querySelector('[name]');
+            if (!named) { return; }
+            fields[named.name] = ul;
+            ul.classList.add('lg-field');
+            ul.setAttribute('data-field', named.name);
+        });
+
+        /* 2) 外壳与页头 */
+        var shell = document.createElement('div');
+        shell.className = 'lg-shell';
+        form.parentNode.insertBefore(shell, form);
+        shell.appendChild(form);
+
+        var hero = document.createElement('div');
+        hero.className = 'lg-hero';
+        hero.innerHTML =
+            '<div class="lg-hero__logo">' + ICONS.link + '</div>' +
+            '<div class="lg-hero__text">' +
+                '<h1 class="lg-hero__title">LinkGo <span class="lg-hero__version">v__LINKGO_VERSION__</span></h1>' +
+                '<p class="lg-hero__sub">外部链接安全跳转 · 中间提示页 · 支持自定义主题与白名单</p>' +
+            '</div>' +
+            '<div class="lg-hero__actions">' +
+                '<a class="lg-chip" href="https://github.com/lhl77/Typecho-Plugin-LinkGo" target="_blank" rel="noopener noreferrer">' + ICONS.github + 'GitHub 仓库</a>' +
+                '<a class="lg-chip" href="https://blog.lhl.one/artical/949.html" target="_blank" rel="noopener noreferrer">' + ICONS.book + '主题开发文档</a>' +
+            '</div>';
+        shell.insertBefore(hero, form);
+
+        /* 3) 两栏布局 */
+        var layout = document.createElement('div');
+        layout.className = 'lg-layout';
+        var main = document.createElement('div');
+        main.className = 'lg-main';
+        var aside = document.createElement('aside');
+        aside.className = 'lg-aside';
+        layout.appendChild(main);
+        layout.appendChild(aside);
+        form.appendChild(layout);
+
+        function cardHead(icon, title, desc) {
+            return '<div class="lg-card__head"><span class="lg-card__icon">' + icon + '</span>' +
+                '<div><div class="lg-card__title">' + title + '</div>' +
+                '<div class="lg-card__desc">' + desc + '</div></div></div>';
+        }
+
+        var used = {};
+        SECTIONS.forEach(function (sec) {
+            var card = document.createElement('section');
+            card.className = 'lg-card';
+            card.innerHTML = cardHead(sec.icon, sec.title, sec.desc) + '<div class="lg-card__body"></div>';
+            var body = card.querySelector('.lg-card__body');
+            var count = 0;
+
+            sec.fields.forEach(function (name) {
+                if (fields[name]) {
+                    body.appendChild(fields[name]);
+                    used[name] = true;
+                    count++;
+                }
+            });
+
+            if (count > 0) {
+                main.appendChild(card);
+            }
+        });
+
+        /* 未归类的字段（兼容未来新增） */
+        var rest = [];
+        Object.keys(fields).forEach(function (name) {
+            if (!used[name]) { rest.push(fields[name]); }
+        });
+        if (rest.length) {
+            var more = document.createElement('section');
+            more.className = 'lg-card';
+            more.innerHTML = cardHead(ICONS.tune, '更多设置', '暂未归类的插件配置项。') + '<div class="lg-card__body"></div>';
+            var moreBody = more.querySelector('.lg-card__body');
+            rest.forEach(function (ul) { moreBody.appendChild(ul); });
+            main.appendChild(more);
+        }
+
+        /* 4) 保存动作条 */
+        if (submitUl) {
+            var actions = document.createElement('div');
+            actions.className = 'lg-actions';
+            actions.innerHTML = '<div class="lg-actions__hint">' + ICONS.shield + '<span>修改后请保存设置</span></div>';
+            actions.appendChild(submitUl);
+            main.appendChild(actions);
+        }
+
+        /* 5) 单选按钮 → MD3 选择胶囊 */
+        function syncRadios() {
+            Array.prototype.forEach.call(main.querySelectorAll('.lg-choice'), function (item) {
+                var radio = item.querySelector('input[type=radio]');
+                if (radio) { item.classList.toggle('is-checked', radio.checked); }
+            });
+        }
+
+        Array.prototype.forEach.call(main.querySelectorAll('ul.typecho-option li > span'), function (item) {
+            if (item.querySelector('input[type=radio]')) { item.classList.add('lg-choice'); }
+        });
+        syncRadios();
+        form.addEventListener('change', function (e) {
+            if (e.target && e.target.type === 'radio') { syncRadios(); }
+        });
+
+        /* 主题色：文本输入 + 原生取色器 */
+        var colorInput = form.querySelector('input[name="themeColor"]');
+        if (colorInput && !colorInput.closest('.lg-color-field')) {
+            var isHexColor = function (value) {
+                return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value || '');
+            };
+            var normalizeHex = function (value) {
+                value = String(value || '');
+                if (!isHexColor(value)) { return ''; }
+                if (value.length === 4) {
+                    value = '#' + value[1] + value[1] + value[2] + value[2] + value[3] + value[3];
+                }
+                return value.toUpperCase();
+            };
+            var colorField = document.createElement('div');
+            colorField.className = 'lg-color-field';
+            colorInput.parentNode.insertBefore(colorField, colorInput);
+            colorField.appendChild(colorInput);
+
+            var colorPicker = document.createElement('input');
+            colorPicker.type = 'color';
+            colorPicker.className = 'lg-color-picker';
+            colorPicker.setAttribute('aria-label', '选择主题色');
+            var pickerSeed = '#6750A4';
+            var currentThemeSelect = form.querySelector('select[name="themeName"]');
+            var currentThemeName = currentThemeSelect ? currentThemeSelect.value : '';
+            for (var ti = 0; ti < THEMES.length; ti++) {
+                if (THEMES[ti].name === currentThemeName && /^#[0-9a-f]{3,6}$/i.test(THEMES[ti].accent || '')) {
+                    pickerSeed = THEMES[ti].accent;
+                    break;
+                }
+            }
+            colorPicker.value = normalizeHex(colorInput.value) || normalizeHex(pickerSeed) || '#6750A4';
+            colorField.appendChild(colorPicker);
+
+            colorPicker.addEventListener('input', function () {
+                colorInput.value = colorPicker.value.toUpperCase();
+                colorInput.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+            colorInput.addEventListener('input', function () {
+                var hex = normalizeHex(colorInput.value);
+                if (hex) { colorPicker.value = hex; }
+            });
+        }
+
+        /* 6) 白名单示例 */
+        var whitelist = form.querySelector('textarea[name="urlWhitelist"], textarea#urlWhitelist');
+        if (whitelist && !document.querySelector('.lg-examples')) {
+            var sample = [
+                '# 常见规则',
+                'github.com',
+                'gitee.com',
+                '',
+                '# 页脚常用',
+                'beian.miit.gov.cn',
+                'ipw.cn/ipv6webcheck',
+                'typecho.org',
+                '',
+                '# 通配符示例',
+                '*.lhl.one'
+            ].join('\n');
+
+            function toast(msg) {
+                var t = document.createElement('div');
+                t.textContent = msg;
+                t.style.cssText = 'position:fixed;right:18px;bottom:18px;z-index:99999;padding:12px 16px;border-radius:14px;background:#1D1B20;color:#F5EFF7;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.28);opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease';
+                document.body.appendChild(t);
+                setTimeout(function () { t.style.opacity = '1'; t.style.transform = 'translateY(0)'; }, 20);
+                setTimeout(function () { t.style.opacity = '0'; t.style.transform = 'translateY(8px)'; }, 1600);
+                setTimeout(function () { if (t.parentNode) { t.parentNode.removeChild(t); } }, 1900);
+            }
+
+            function copyText(text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    return navigator.clipboard.writeText(text);
+                }
+                return new Promise(function (resolve, reject) {
+                    try {
+                        var ta = document.createElement('textarea');
+                        ta.value = text;
+                        ta.setAttribute('readonly', '');
+                        ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+                        document.body.appendChild(ta);
+                        ta.select();
+                        var ok = document.execCommand('copy');
+                        document.body.removeChild(ta);
+                        ok ? resolve() : reject(new Error('copy failed'));
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+            }
+
+            var box = document.createElement('div');
+            box.className = 'lg-examples';
+            box.innerHTML =
+                '<div class="ex-title">常见需求示例</div>' +
+                '<div class="ex-desc">这些规则会让命中的外链保持原样（不改写成 /go/xxx），可直接复制或追加到白名单。</div>' +
+                '<div class="ex-actions">' +
+                    '<button type="button" class="ex-btn" data-act="copy">复制示例</button>' +
+                    '<button type="button" class="ex-btn" data-act="append">追加到白名单</button>' +
+                '</div>' +
+                '<pre><code></code></pre>';
+
+            box.querySelector('code').textContent = sample;
+            var whitelistField = whitelist.closest ? whitelist.closest('ul.typecho-option') : null;
+            if (whitelistField) {
+                whitelistField.insertAdjacentElement('afterend', box);
+            } else {
+                whitelist.insertAdjacentElement('afterend', box);
+            }
+
+            // 白名单的规则说明较长，折叠为「规则说明」面板
+            var desc = whitelistField ? whitelistField.querySelector('.description') : null;
+            if (desc && desc.innerHTML && desc.innerHTML.replace(/<[^>]+>/g, '').length > 160) {
+                var details = document.createElement('details');
+                details.className = 'lg-help';
+                var summary = document.createElement('summary');
+                summary.textContent = '规则说明与示例写法';
+                var helpBody = document.createElement('div');
+                helpBody.className = 'lg-help__body';
+                helpBody.innerHTML = desc.innerHTML;
+                details.appendChild(summary);
+                details.appendChild(helpBody);
+                desc.parentNode.replaceChild(details, desc);
+            }
+
+            box.addEventListener('click', function (e) {
+                var btn = e.target && e.target.closest ? e.target.closest('button[data-act]') : null;
+                if (!btn) { return; }
+
+                if (btn.getAttribute('data-act') === 'copy') {
+                    copyText(sample).then(function () {
+                        toast('已复制示例规则');
+                    }).catch(function () {
+                        toast('复制失败，请手动选择复制');
+                    });
+                    return;
+                }
+
+                var current = String(whitelist.value || '').replace(/\s+$/, '');
+                whitelist.value = current ? (current + '\n\n' + sample) : sample;
+                whitelist.dispatchEvent(new Event('input', { bubbles: true }));
+                toast('已追加到白名单');
+            });
+        }
+
+        /* 7) 主题预览 */
+        var themeSelect = form.querySelector('select[name="themeName"]');
+        var themesWrap = document.createElement('section');
+        themesWrap.className = 'lg-card lg-preview-card';
+        themesWrap.innerHTML =
+            cardHead(ICONS.monitor, '跳转页主题预览', '实时渲染所选主题的跳转提示页，示例链接不会真的跳转。') +
+            '<div class="lg-card__body">' +
+                '<div class="lg-themes" role="group" aria-label="选择主题"></div>' +
+                '<div class="lg-preview-bar">' +
+                    '<span class="lg-preview-name"></span>' +
+                    '<span class="lg-seg" role="group" aria-label="预览尺寸">' +
+                        '<button type="button" class="lg-seg__btn is-active" data-mode="desktop">桌面</button>' +
+                        '<button type="button" class="lg-seg__btn" data-mode="mobile">手机</button>' +
+                    '</span>' +
+                '</div>' +
+                '<div class="lg-frame">' +
+                    '<div class="lg-frame__loading"><span class="lg-spinner"></span><span>正在加载预览…</span></div>' +
+                    '<div class="lg-frame__stage"><iframe class="lg-frame__iframe" title="跳转页主题预览" loading="lazy" referrerpolicy="no-referrer"></iframe></div>' +
+                '</div>' +
+                '<div class="lg-preview-foot">' +
+                    '<span class="lg-preview-tip">预览使用示例链接</span>' +
+                    '<a class="lg-text-btn" target="_blank" rel="noopener noreferrer">新窗口打开' + ICONS.external + '</a>' +
+                '</div>' +
+            '</div>';
+        aside.appendChild(themesWrap);
+
+        var chips = themesWrap.querySelector('.lg-themes');
+        var frame = themesWrap.querySelector('.lg-frame');
+        var iframe = themesWrap.querySelector('.lg-frame__iframe');
+        var loading = themesWrap.querySelector('.lg-frame__loading');
+        var nameEl = themesWrap.querySelector('.lg-preview-name');
+        var openLink = themesWrap.querySelector('.lg-text-btn');
+
+        // 桌面预览：iframe 按 1280×800 渲染，再等比缩放塞进卡片，才能在小区域里看到真正的桌面布局
+        var PREVIEW_STAGE_W = 1280;
+        function fitPreview() {
+            if (!frame) { return; }
+            var w = frame.clientWidth || 0;
+            if (w <= 0) { return; }
+            var scale = w / PREVIEW_STAGE_W;
+            if (scale > 1) { scale = 1; }
+            frame.style.setProperty('--lg-preview-scale', scale.toFixed(4));
+        }
+        window.addEventListener('resize', fitPreview);
+        if (typeof ResizeObserver === 'function') {
+            try { new ResizeObserver(fitPreview).observe(frame); } catch (e) { /* ignore */ }
+        }
+        fitPreview();
+
+        var list = (THEMES && THEMES.length) ? THEMES : [];
+        if (!list.length && themeSelect) {
+            Array.prototype.forEach.call(themeSelect.options, function (opt) {
+                list.push({ name: opt.value, accent: '#CAC4D0' });
+            });
+        }
+
+        list.forEach(function (theme) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'lg-theme';
+            btn.setAttribute('data-theme', theme.name);
+            var dot = document.createElement('span');
+            dot.className = 'lg-theme__dot';
+            dot.style.background = theme.accent || '#CAC4D0';
+            btn.appendChild(dot);
+            btn.appendChild(document.createTextNode(theme.name));
+            btn.addEventListener('click', function () {
+                applyTheme(theme.name, true);
+            });
+            chips.appendChild(btn);
+        });
+
+        var PREVIEW_SYNC_FIELDS = ['siteTitle', 'logoUrl', 'startYear', 'showFullUrl', 'showLogo', 'robotsPolicy', 'themeColor'];
+
+        function fieldValue(name) {
+            var el = form.querySelector('[name="' + name + '"]');
+            if (!el) { return ''; }
+            if (el.type === 'radio') {
+                var checked = form.querySelector('[name="' + name + '"]:checked');
+                return checked ? checked.value : '';
+            }
+            return el.value || '';
+        }
+
+        function previewUrl(name) {
+            if (!PREVIEW_BASE) { return ''; }
+            var parts = ['linkgo_preview=' + encodeURIComponent(name)];
+            PREVIEW_SYNC_FIELDS.forEach(function (field) {
+                var value = fieldValue(field);
+                // 防止 URL 过长（预览请求上限 4096）
+                if (field === 'logoUrl' && value.length > 600) { return; }
+                if (field === 'siteTitle' && value.length > 200) { value = value.slice(0, 200); }
+                // 主题色始终上传（空值表示恢复主题默认）
+                if (field === 'themeColor') {
+                    parts.push('lg_themeColor=' + encodeURIComponent(value));
+                    return;
+                }
+                if (value !== '') {
+                    parts.push('lg_' + field + '=' + encodeURIComponent(value));
+                }
+            });
+            return PREVIEW_BASE + '?' + parts.join('&');
+        }
+
+        function applyTheme(name, load) {
+            name = name || (themeSelect && themeSelect.value) || (list[0] && list[0].name) || 'Default';
+
+            if (themeSelect && themeSelect.value !== name) {
+                themeSelect.value = name;
+            }
+
+            Array.prototype.forEach.call(chips.children, function (btn) {
+                btn.classList.toggle('is-active', btn.getAttribute('data-theme') === name);
+            });
+
+            nameEl.textContent = '当前主题 · ' + name;
+
+            var url = previewUrl(name);
+            if (openLink) {
+                if (url) {
+                    openLink.href = url;
+                    openLink.style.display = '';
+                } else {
+                    openLink.style.display = 'none';
+                }
+            }
+
+            if (load && iframe) {
+                if (!url) {
+                    iframe.removeAttribute('src');
+                    loading.textContent = '未获取到站点地址，暂时无法加载预览';
+                    return;
+                }
+
+                loading.style.display = 'flex';
+                loading.innerHTML = '<span class="lg-spinner"></span><span>正在加载预览…</span>';
+
+                iframe.addEventListener('load', function onLoad() {
+                    iframe.removeEventListener('load', onLoad);
+                    loading.style.display = 'none';
+                });
+
+                iframe.setAttribute('src', url);
+            }
+        }
+
+        Array.prototype.forEach.call(themesWrap.querySelectorAll('.lg-seg__btn'), function (btn) {
+            btn.addEventListener('click', function () {
+                Array.prototype.forEach.call(themesWrap.querySelectorAll('.lg-seg__btn'), function (b) {
+                    b.classList.toggle('is-active', b === btn);
+                });
+                frame.classList.toggle('is-mobile', btn.getAttribute('data-mode') === 'mobile');
+                fitPreview();
+            });
+        });
+
+        if (themeSelect) {
+            themeSelect.addEventListener('change', function () {
+                applyTheme(themeSelect.value, true);
+            });
+        }
+
+        // 表单当前值变化时实时刷新预览（无需先保存）
+        var previewTimer = null;
+        function schedulePreview() {
+            clearTimeout(previewTimer);
+            previewTimer = setTimeout(function () {
+                applyTheme(themeSelect ? themeSelect.value : '', true);
+            }, 450);
+        }
+
+        function onPreviewFieldChange(e) {
+            if (!e.target || !e.target.name) { return; }
+            if (PREVIEW_SYNC_FIELDS.indexOf(e.target.name) !== -1) {
+                schedulePreview();
+            }
+        }
+
+        form.addEventListener('input', onPreviewFieldChange);
+        form.addEventListener('change', onPreviewFieldChange);
+
+        applyTheme(themeSelect ? themeSelect.value : '', true);
+        fitPreview();
+    });
+})();
+</script>
+LG_JS;
+
+        $script = str_replace(
+            array('__LINKGO_THEMES_JSON__', '__LINKGO_PREVIEW_BASE__', '__LINKGO_VERSION__'),
+            array($themesJson, json_encode($previewBase), self::VERSION),
+            $script
+        );
+
+        echo $script;
     }
 
     public static function personalConfig(Typecho_Widget_Helper_Form $form)
@@ -601,6 +1587,102 @@ LG_PLUGIN_CONFIG_SCRIPT;
         return strtr($content, $protected);
     }
 
+    /**
+     * 读取「外链属性」相关设置（rel / title / class / data 标记）。
+     */
+    private static function getLinkAttributeSettings($pluginOptions)
+    {
+        $relMode = isset($pluginOptions->linkRelMode) ? (string)$pluginOptions->linkRelMode : 'noopener noreferrer';
+        $relMap = array(
+            'none' => array(),
+            'noopener' => array('noopener'),
+            'noopener noreferrer' => array('noopener', 'noreferrer'),
+            'nofollow noopener noreferrer' => array('nofollow', 'noopener', 'noreferrer'),
+            'sponsored nofollow noopener noreferrer' => array('sponsored', 'nofollow', 'noopener', 'noreferrer'),
+        );
+
+        $titleMode = isset($pluginOptions->linkTitleMode) ? (string)$pluginOptions->linkTitleMode : 'host';
+        if (!in_array($titleMode, array('none', 'host', 'full'), true)) {
+            $titleMode = 'host';
+        }
+
+        return array(
+            'rel' => isset($relMap[$relMode]) ? $relMap[$relMode] : $relMap['noopener noreferrer'],
+            'title' => $titleMode,
+            'class' => self::normalizeLinkClassName(isset($pluginOptions->linkClassName) ? $pluginOptions->linkClassName : ''),
+            'data' => self::isEnabledOption($pluginOptions, 'addDataAttr', true),
+        );
+    }
+
+    /**
+     * 清洗自定义 class（最多 5 个，只允许字母/数字/下划线/中划线）。
+     */
+    private static function normalizeLinkClassName($raw)
+    {
+        $raw = trim((string)$raw);
+        if ($raw === '') {
+            return '';
+        }
+
+        $out = array();
+        foreach (preg_split('/\s+/', $raw) as $part) {
+            if (preg_match('/^[A-Za-z0-9_\-]{1,40}$/', $part)) {
+                $out[] = $part;
+            }
+            if (count($out) >= 5) {
+                break;
+            }
+        }
+
+        return implode(' ', $out);
+    }
+
+    /**
+     * 给改写后的 <a> 追加 rel / title / class / data 属性。
+     */
+    private static function applyLinkAttributes($attrs, $href, array $settings)
+    {
+        // rel：与作者原有的 rel 合并去重
+        $existingRel = array();
+        if (preg_match('/\s+rel\s*=\s*("|\')([^"\']*)\1/i', $attrs, $m)) {
+            $existingRel = array_filter(preg_split('/\s+/', strtolower(trim($m[2]))));
+        }
+        $attrs = preg_replace('/\s+rel\s*=\s*("|\')[^"\']*\1/i', '', $attrs);
+        $rel = array_values(array_unique(array_merge($existingRel, $settings['rel'])));
+        if (!empty($rel)) {
+            $attrs .= ' rel="' . htmlspecialchars(implode(' ', $rel), ENT_QUOTES) . '"';
+        }
+
+        // title：作者已写 title 时不覆盖
+        if ($settings['title'] !== 'none' && !preg_match('/\s+title\s*=/i', $attrs)) {
+            $host = parse_url($href, PHP_URL_HOST);
+            $titleValue = $settings['title'] === 'full' ? $href : ($host ?: $href);
+            if ($titleValue !== '') {
+                $attrs .= ' title="' . htmlspecialchars('即将离开本站，前往 ' . $titleValue, ENT_QUOTES) . '"';
+            }
+        }
+
+        // class：追加到已有 class
+        if ($settings['class'] !== '') {
+            $existingClass = '';
+            if (preg_match('/\s+class\s*=\s*("|\')([^"\']*)\1/i', $attrs, $cm)) {
+                $existingClass = trim($cm[2]);
+                $attrs = preg_replace('/\s+class\s*=\s*("|\')[^"\']*\1/i', '', $attrs);
+            }
+            $classValue = trim($existingClass . ' ' . $settings['class']);
+            if ($classValue !== '') {
+                $attrs .= ' class="' . htmlspecialchars($classValue, ENT_QUOTES) . '"';
+            }
+        }
+
+        // data-linkgo="1"
+        if ($settings['data'] && !preg_match('/\s+data-linkgo\s*=/i', $attrs)) {
+            $attrs .= ' data-linkgo="1"';
+        }
+
+        return $attrs;
+    }
+
     private static function rewriteHtmlAnchors($content, $siteHost, $siteUrl, $pluginOptions)
     {
         if (!is_string($content) || $content === '') {
@@ -610,9 +1692,13 @@ LG_PLUGIN_CONFIG_SCRIPT;
         $protected = array();
         $content = self::protectSkipZones($content, $protected);
 
+        // 「外部链接打开方式」设置：改写后的外链是否在新标签页打开
+        $openNewTab = self::isEnabledOption($pluginOptions, 'openInNewTab', true);
+        $linkSettings = self::getLinkAttributeSettings($pluginOptions);
+
         $content = preg_replace_callback(
             '/<a\s+([^>]*?)href=("|\')(.*?)\2([^>]*)>/i',
-            function ($matches) use ($siteHost, $siteUrl, $pluginOptions) {
+            function ($matches) use ($siteHost, $siteUrl, $pluginOptions, $openNewTab, $linkSettings) {
                 $beforeAttrs = $matches[1];
                 $href = $matches[3];
                 $afterAttrs = $matches[4];
@@ -634,6 +1720,13 @@ LG_PLUGIN_CONFIG_SCRIPT;
 
                 $encodedUrl = rtrim(strtr(base64_encode($href), '+/', '-_'), '=');
                 $newHref = rtrim($siteUrl, '/') . '/go/' . $encodedUrl;
+
+                if ($openNewTab) {
+                    $afterAttrs = preg_replace('/\s+target\s*=\s*("|\')[^"\']*\1/i', '', $afterAttrs);
+                    $afterAttrs .= ' target="_blank"';
+                }
+
+                $afterAttrs = self::applyLinkAttributes($afterAttrs, $href, $linkSettings);
 
                 return '<a ' . $beforeAttrs . 'href="' . $newHref . '"' . $afterAttrs . '>';
             },
@@ -809,6 +1902,12 @@ LG_PLUGIN_CONFIG_SCRIPT;
                     $rawWhitelist = '';
                 }
                 $skipLinksPluginUrls = self::isEnabledOption(isset($pluginOptions2) ? $pluginOptions2 : null, 'skipLinksPluginUrls', false);
+                $openNewTab = self::isEnabledOption(isset($pluginOptions2) ? $pluginOptions2 : null, 'openInNewTab', true);
+                $linkAttrSettings = self::getLinkAttributeSettings(isset($pluginOptions2) ? $pluginOptions2 : null);
+                $linkRelTokens = implode(' ', $linkAttrSettings['rel']);
+                $linkTitleMode = $linkAttrSettings['title'];
+                $linkExtraClass = $linkAttrSettings['class'];
+                $linkAddData = $linkAttrSettings['data'] ? '1' : '0';
                 $linksPluginUrlsJson = '[]';
                 if ($skipLinksPluginUrls) {
                     $linksPluginUrlsJson = json_encode(array_values(array_keys(self::getLinksPluginUrlMap())));
@@ -827,6 +1926,11 @@ LG_PLUGIN_CONFIG_SCRIPT;
     var rawWhitelist = '';
     var rawWhitelistB64 = "__LINKGO_WL_B64__";
     var skipLinksPluginUrls = "__LINKGO_SKIP_LINKS__" === '1';
+    var openNewTab = "__LINKGO_OPEN_NEW__" === '1';
+    var relTokens = "__LINKGO_REL_TOKENS__";
+    var titleMode = "__LINKGO_TITLE_MODE__";
+    var extraClass = "__LINKGO_EXTRA_CLASS__";
+    var addDataAttr = "__LINKGO_ADD_DATA__" === '1';
     var linksPluginUrls = __LINKGO_LINKS_URLS__;
     try{
         rawWhitelist = rawWhitelistB64 ? atob(String(rawWhitelistB64)) : '';
@@ -979,6 +2083,28 @@ LG_PLUGIN_CONFIG_SCRIPT;
         var enc = urlSafeBase64Encode(href);
         if(!enc) return;
         a.setAttribute('href', siteBase.replace(/\/$/, '') + '/go/' + enc);
+        if(openNewTab){
+            a.setAttribute('target', '_blank');
+        }
+        var relList = (a.getAttribute('rel') || '').toLowerCase().split(/\s+/);
+        var addRel = relTokens ? relTokens.split(/\s+/) : [];
+        for(var ri=0; ri<addRel.length; ri++){
+            if(addRel[ri] && relList.indexOf(addRel[ri]) === -1) relList.push(addRel[ri]);
+        }
+        relList = relList.filter(function(x){ return !!x; });
+        if(relList.length){ a.setAttribute('rel', relList.join(' ')); }
+        if(titleMode !== 'none' && !a.getAttribute('title')){
+            var titleValue = href;
+            if(titleMode !== 'full'){
+                try{ titleValue = new URL(href, location.href).host; }catch(e){}
+            }
+            if(titleValue){ a.setAttribute('title', '即将离开本站，前往 ' + titleValue); }
+        }
+        if(extraClass){
+            var cls = a.getAttribute('class') || '';
+            a.setAttribute('class', (cls ? cls + ' ' : '') + extraClass);
+        }
+        if(addDataAttr){ a.setAttribute('data-linkgo', '1'); }
         if(a.dataset) a.dataset.linkgoRewritten='1';
     }
 
@@ -1008,8 +2134,8 @@ LINKGO_JS;
                 // 注入 PHP 变量到 nowdoc 生成的脚本中
                 $siteBaseVal = rtrim($siteUrl, '/');
                 $script = str_replace(
-                    array('__LINKGO_SITE__', '__LINKGO_WL_B64__', '__LINKGO_SKIP_LINKS__', '__LINKGO_LINKS_URLS__'),
-                    array(addslashes($siteBaseVal), addslashes($whitelistB64), $skipLinksPluginUrls ? '1' : '0', $linksPluginUrlsJson),
+                    array('__LINKGO_SITE__', '__LINKGO_WL_B64__', '__LINKGO_SKIP_LINKS__', '__LINKGO_OPEN_NEW__', '__LINKGO_REL_TOKENS__', '__LINKGO_TITLE_MODE__', '__LINKGO_EXTRA_CLASS__', '__LINKGO_ADD_DATA__', '__LINKGO_LINKS_URLS__'),
+                    array(addslashes($siteBaseVal), addslashes($whitelistB64), $skipLinksPluginUrls ? '1' : '0', $openNewTab ? '1' : '0', addslashes($linkRelTokens), addslashes($linkTitleMode), addslashes($linkExtraClass), $linkAddData, $linksPluginUrlsJson),
                     $script
                 );
 

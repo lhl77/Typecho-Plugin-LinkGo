@@ -1,0 +1,81 @@
+/* LinkGo · Spotify 风格：深灰画布、分层卡片、品牌绿胶囊按钮 */
+:root{
+    --sp-canvas:#121212;
+    --sp-card:#181818;
+    --sp-card-2:#1F1F1F;
+    --sp-border:#2A2A2A;
+    --sp-fg:#FFFFFF;
+    --sp-muted:#A7A7A7;
+    --sp-radius:12px;
+    color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+    font-family:'CircularSp','Circular',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,'PingFang SC','Microsoft YaHei',sans-serif;
+    background:var(--sp-canvas);
+    color:var(--sp-fg);
+    -webkit-font-smoothing:antialiased;
+}
+.sp-shell{
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:16px;padding:40px 20px;
+    background:radial-gradient(120% 80% at 50% -10%,rgba(29,185,84,.16) 0%,transparent 62%),var(--sp-canvas);
+}
+.sp-box{
+    width:100%;max-width:520px;
+    background:var(--sp-card);
+    border:1px solid var(--sp-border);
+    border-radius:var(--sp-radius);
+    padding:26px;
+}
+.sp-head{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.sp-logo{
+    width:40px;height:40px;border-radius:50%;overflow:hidden;
+    border:1px solid var(--sp-border);background:var(--sp-card-2);
+    display:flex;align-items:center;justify-content:center;
+}
+.sp-logo img{width:100%;height:100%;object-fit:contain}
+.sp-label{
+    font-size:11px;font-weight:700;line-height:1;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--sp-muted);
+    padding:6px 11px;border:1px solid var(--sp-border);border-radius:9999px;
+}
+.sp-title{margin:0;font-size:25px;font-weight:800;line-height:1.25;letter-spacing:-.02em}
+.sp-desc{margin:9px 0 0;font-size:14.5px;line-height:1.55;color:var(--sp-muted)}
+.sp-url{
+    margin-top:18px;padding:12px 14px;
+    font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+    font-size:13px;line-height:1.5;word-break:break-all;
+    background:var(--sp-card-2);
+    border-radius:8px;
+    color:var(--sp-fg);
+}
+.sp-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;align-items:center}
+.sp-btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:0 24px;
+    font-size:15px;font-weight:700;text-decoration:none;
+    border-radius:9999px;border:1px solid transparent;
+    transition:transform .12s ease,filter .12s ease,background .12s ease;
+}
+.sp-btn--primary{
+    flex:1 1 auto;
+    background:var(--lg-accent,#1DB954);
+    color:var(--lg-on-accent,#000000);
+}
+.sp-btn--primary:hover{filter:brightness(1.08);transform:scale(1.02)}
+.sp-btn--ghost{
+    flex:0 1 auto;
+    color:var(--sp-fg);background:transparent;border-color:#4D4D4D;
+}
+.sp-btn--ghost:hover{border-color:var(--sp-fg)}
+.sp-btn:focus-visible{outline:2px solid var(--lg-accent,#1DB954);outline-offset:3px}
+.sp-foot{font-size:12px;color:var(--sp-muted)}
+@media (max-width:560px){
+    .sp-shell{padding:24px 14px;justify-content:flex-start;padding-top:48px}
+    .sp-box{padding:20px}
+    .sp-title{font-size:21px}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.001ms!important}}

@@ -1,5 +1,5 @@
 /* Bootstrap-Default 自定义样式（仿 Default 风格，基于 Bootstrap） */
-:root{--bg-light:#F7F8FA;--bg-dark:#0F0F0F;--primary:#f7d368;--muted:#6B6470;--radius:12px}
+:root{--bg-light:#F7F8FA;--bg-dark:#0F0F0F;--primary:var(--lg-accent,#0D6EFD);--muted:#6B6470;--radius:12px}
 html,body{height:100%}
 body{background-color:var(--bg-light);color:#111827;font-family: 'Noto Sans SC','Roboto',system-ui,Arial,'Microsoft YaHei';-webkit-font-smoothing:antialiased}
 @media (prefers-color-scheme: dark){body{background-color:var(--bg-dark);color:#E6EEF8}}
@@ -22,12 +22,12 @@ body{background-color:var(--bg-light);color:#111827;font-family: 'Noto Sans SC',
 .url-box{display:block;word-break:break-all;background:rgba(0,0,0,0.04);padding:10px;border-radius:8px}
 @media (prefers-color-scheme: dark){.url-box{background:rgba(255,255,255,0.03);color:#E6EEF8}}
 
-.btn-primary{background:var(--primary);border-color:transparent;color:#1F1B24}
+.btn-primary{background:var(--primary);border-color:transparent;color:var(--lg-on-accent,#FFFFFF)}
 .btn-primary:focus, .btn-primary:hover{ filter:brightness(0.95); }
 .btn-outline-secondary{border-color: rgba(255,255,255,0.12);border-radius:10px}
 
 .progress{background:rgba(0,0,0,0.06)}
-.progress-bar{background:linear-gradient(90deg,var(--primary),#e6651a)}
+.progress-bar{background:var(--primary)}
 
 .site-footer{margin-top:12px;font-size:13px;color:rgba(230,238,248,0.7)}
 

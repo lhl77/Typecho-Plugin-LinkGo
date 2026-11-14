@@ -5,8 +5,6 @@
 [![Issues](https://img.shields.io/github/issues/lhl77/Typecho-Plugin-LinkGo)](https://github.com/lhl77/Typecho-Plugin-LinkGo/issues)
 [![License](https://img.shields.io/github/license/lhl77/Typecho-Plugin-LinkGo)](https://github.com/lhl77/Typecho-Plugin-LinkGo/blob/master/LICENSE)
 
-AB Store Web 插件主页: https://ab-store.lhl.one/plugin/b51ca0f8
-
 跳转页模板位于插件目录：
 `LinkGo/page/themes/<ThemeName>/template.php` 与 `style.css`。
 
@@ -40,8 +38,14 @@ LinkGo/
 - `$logoUrl` — 配置的 Logo URL
 - `$url` — 解码后的目标 URL（完整）
 - `$display_url` — 用于前端显示的简短目标（如去掉协议或做截断）
+- `$displayUrl` — 按「目标链接显示方式」计算后的展示地址（完整链接或仅域名）
+- `$showFullUrl` / `$showLogo` — 链接显示方式 / 是否显示 Logo
+- `$themeColor` — 主题色（`#RRGGBB`，空字符串表示跟随主题默认）
+- `$themeColorOn` — 主题色对应的对比文字色（`#FFFFFF` / `#000000`）
+- `$robotsContent` — 跳转页 robots meta 内容（空字符串表示不输出）
 - `$displayYear` — 页脚要显示的年份（从 `startYear` 到当前年）
 - `$themeName` — 当前主题名
+- `$previewMode` — 是否处于主题预览模式（`true` 时请勿自动跳转）
 
 注意：若你直接包含 `template.php`（例如本地测试），请确保这些变量存在或为其设置默认值，以防 PHP Notice。
 

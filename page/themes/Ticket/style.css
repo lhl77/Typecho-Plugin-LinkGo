@@ -1,0 +1,149 @@
+/* LinkGo · Ticket 主题：登机牌 / 车票样式 */
+:root{
+    --tk-page:#F4F1EC;
+    --tk-card:#FFFFFF;
+    --tk-fg:#1B1A17;
+    --tk-muted:#6B6660;
+    --tk-dash:#D8D2C8;
+    --tk-radius:18px;
+    color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+    :root{
+        --tk-page:#14120F;
+        --tk-card:#1C1A17;
+        --tk-fg:#F5F2EC;
+        --tk-muted:#9A938A;
+        --tk-dash:#3A352E;
+    }
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+    margin:0;display:flex;align-items:center;justify-content:center;
+    min-height:100vh;
+    background:
+        radial-gradient(70% 50% at 50% 0%,color-mix(in srgb,var(--lg-accent,#E4572E) 12%,transparent) 0%,transparent 65%),
+        var(--tk-page);
+    color:var(--tk-fg);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;
+    -webkit-font-smoothing:antialiased;
+}
+.tk-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 16px;width:100%}
+.tk-ticket{
+    display:flex;align-items:stretch;
+    width:100%;max-width:700px;
+    background:var(--tk-card);
+    border-radius:var(--tk-radius);
+    box-shadow:0 18px 44px rgba(27,26,23,.14),0 2px 6px rgba(27,26,23,.06);
+    overflow:hidden;
+}
+.tk-main{flex:1 1 auto;min-width:0;padding:26px 26px 24px}
+.tk-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:20px}
+.tk-brand{
+    font-size:11px;font-weight:700;letter-spacing:.22em;
+    color:var(--tk-muted);
+}
+.tk-chip{
+    font-size:11px;font-weight:600;line-height:1;
+    padding:5px 10px;border-radius:100px;
+    color:var(--lg-on-accent,#FFFFFF);
+    background:var(--lg-accent,#E4572E);
+}
+.tk-route{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.tk-point{display:flex;flex-direction:column;gap:4px;min-width:0}
+.tk-point--to{flex:1 1 auto}
+.tk-k{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--tk-muted)}
+.tk-v{
+    font-size:17px;font-weight:600;line-height:1.25;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.tk-v--lg{font-size:26px;letter-spacing:-.02em}
+.tk-arrow{font-size:20px;line-height:1;color:var(--lg-accent,#E4572E);padding-bottom:2px}
+.tk-title{margin:18px 0 0;font-size:18px;font-weight:600;line-height:1.35}
+.tk-desc{margin:6px 0 0;font-size:13.5px;line-height:1.6;color:var(--tk-muted)}
+.tk-meta{
+    display:flex;gap:24px;flex-wrap:wrap;
+    margin-top:18px;padding-top:16px;
+    border-top:1px dashed var(--tk-dash);
+}
+.tk-meta__item{display:flex;flex-direction:column;gap:3px}
+.tk-meta__item b{font-size:13px;font-weight:600;letter-spacing:.02em}
+.tk-url{
+    margin-top:16px;padding:10px 12px;
+    font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+    font-size:12px;line-height:1.5;word-break:break-all;
+    color:var(--tk-fg);
+    background:color-mix(in srgb,var(--lg-accent,#E4572E) 8%,transparent);
+    border-radius:8px;
+}
+.tk-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.tk-btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:40px;padding:0 20px;
+    font-size:14px;font-weight:600;text-decoration:none;
+    color:var(--tk-fg);
+    background:transparent;
+    border:1px solid var(--tk-dash);
+    border-radius:100px;
+    transition:background .14s ease,filter .14s ease,border-color .14s ease;
+}
+.tk-btn:hover{background:color-mix(in srgb,var(--tk-fg) 6%,transparent)}
+.tk-btn--primary{
+    color:var(--lg-on-accent,#FFFFFF);
+    background:var(--lg-accent,#E4572E);
+    border-color:var(--lg-accent,#E4572E);
+}
+.tk-btn--primary:hover{filter:brightness(.94)}
+.tk-btn:focus-visible{outline:2px solid var(--lg-accent,#E4572E);outline-offset:2px}
+.tk-stub{
+    flex:0 0 132px;
+    display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+    gap:12px;padding:24px 14px;
+    border-left:2px dashed var(--tk-dash);
+    background:color-mix(in srgb,var(--lg-accent,#E4572E) 5%,transparent);
+    position:relative;
+}
+.tk-stub::before,
+.tk-stub::after{
+    content:"";position:absolute;left:-11px;
+    width:20px;height:20px;border-radius:50%;
+    background:var(--tk-page);
+}
+.tk-stub::before{top:-11px}
+.tk-stub::after{bottom:-11px}
+.tk-stub__label{
+    font-size:11px;font-weight:700;letter-spacing:.2em;
+    color:var(--tk-muted);
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+}
+.tk-barcode{
+    width:100%;height:56px;
+    background:repeating-linear-gradient(90deg,
+        var(--tk-fg) 0 2px,
+        transparent 2px 4px,
+        var(--tk-fg) 4px 5px,
+        transparent 5px 9px);
+    opacity:.78;
+}
+.tk-stub__code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:10.5px;letter-spacing:.08em;color:var(--tk-muted);
+}
+.tk-foot{margin:0;font-size:12px;color:var(--tk-muted)}
+@media (max-width:640px){
+    .tk-wrap{padding:24px 12px}
+    .tk-ticket{flex-direction:column}
+    .tk-main{padding:20px}
+    .tk-v--lg{font-size:22px}
+    .tk-stub{
+        flex:0 0 auto;flex-direction:row;align-items:center;justify-content:center;
+        border-left:0;border-top:2px dashed var(--tk-dash);
+        padding:16px;
+    }
+    .tk-stub::before{left:-11px;top:-11px}
+    .tk-stub::after{left:auto;right:-11px;top:-11px;bottom:auto}
+    .tk-stub__label{writing-mode:horizontal-tb;transform:none}
+    .tk-barcode{width:60%;height:36px}
+}

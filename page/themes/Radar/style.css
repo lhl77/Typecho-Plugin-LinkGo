@@ -1,0 +1,141 @@
+/* LinkGo · Radar：雷达扫描 + 军事终端 */
+:root{
+    --rd-bg:#05130D;
+    --rd-fg:#D7FBE8;
+    --rd-muted:#5C8C77;
+    color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+    margin:0;
+    background:
+        radial-gradient(110% 80% at 50% 0%,color-mix(in srgb,var(--lg-accent,#00FF9C) 10%,transparent) 0%,transparent 62%),
+        var(--rd-bg);
+    color:var(--rd-fg);
+    font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'PingFang SC','Microsoft YaHei',monospace;
+    -webkit-font-smoothing:antialiased;
+}
+.rd{
+    position:relative;overflow:hidden;
+    min-height:100vh;
+    display:flex;align-items:center;justify-content:center;
+    padding:40px 18px;
+}
+/* 雷达 */
+.rd-scope{
+    position:absolute;left:50%;top:50%;
+    width:min(78vh,640px);height:min(78vh,640px);
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    opacity:.5;
+    pointer-events:none;
+}
+.rd-ring{
+    position:absolute;border-radius:50%;
+    border:1px solid color-mix(in srgb,var(--lg-accent,#00FF9C) 26%,transparent);
+}
+.rd-ring--1{inset:0}
+.rd-ring--2{inset:16%}
+.rd-ring--3{inset:32%}
+.rd-cross{position:absolute;background:color-mix(in srgb,var(--lg-accent,#00FF9C) 18%,transparent)}
+.rd-cross--x{left:0;right:0;top:50%;height:1px}
+.rd-cross--y{top:0;bottom:0;left:50%;width:1px}
+.rd-sweep{
+    position:absolute;inset:0;border-radius:50%;
+    background:conic-gradient(from 0deg,
+        color-mix(in srgb,var(--lg-accent,#00FF9C) 42%,transparent) 0deg,
+        transparent 42deg,
+        transparent 360deg);
+    animation:rd-sweep 3.6s linear infinite;
+}
+@keyframes rd-sweep{to{transform:rotate(360deg)}}
+.rd-blip{
+    position:absolute;left:68%;top:26%;
+    width:10px;height:10px;border-radius:50%;
+    background:var(--lg-accent,#00FF9C);
+    box-shadow:0 0 0 0 color-mix(in srgb,var(--lg-accent,#00FF9C) 60%,transparent);
+    animation:rd-blip 2.4s ease-out infinite;
+}
+@keyframes rd-blip{
+    0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--lg-accent,#00FF9C) 60%,transparent);opacity:1}
+    70%{box-shadow:0 0 0 26px transparent;opacity:.9}
+    100%{box-shadow:0 0 0 30px transparent;opacity:.35}
+}
+/* 面板 */
+.rd-panel{
+    position:relative;z-index:1;
+    width:100%;max-width:540px;
+    padding:24px 26px 22px;
+    background:rgba(4,18,12,.82);
+    border:1px solid color-mix(in srgb,var(--lg-accent,#00FF9C) 38%,transparent);
+    border-radius:6px;
+    backdrop-filter:blur(3px);
+    box-shadow:0 0 0 1px rgba(0,0,0,.4),0 20px 60px rgba(0,0,0,.55);
+}
+.rd-kicker{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    margin:0 0 16px;
+    font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--lg-accent,#00FF9C);
+}
+.rd-logo{
+    width:22px;height:22px;border-radius:4px;overflow:hidden;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:color-mix(in srgb,var(--lg-accent,#00FF9C) 18%,transparent);
+}
+.rd-logo img{width:100%;height:100%;object-fit:cover;display:block}
+.rd-title{margin:0;font-size:26px;font-weight:700;line-height:1.25;letter-spacing:.02em;color:#FFFFFF}
+.rd-host{
+    margin:8px 0 0;
+    font-size:clamp(22px,3.4vw,30px);font-weight:700;letter-spacing:.01em;
+    word-break:break-all;
+    color:var(--lg-accent,#00FF9C);
+    text-shadow:0 0 18px color-mix(in srgb,var(--lg-accent,#00FF9C) 45%,transparent);
+}
+.rd-meta{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;
+    margin:20px 0 0;padding:14px 0;
+    border-top:1px dashed color-mix(in srgb,var(--lg-accent,#00FF9C) 24%,transparent);
+    border-bottom:1px dashed color-mix(in srgb,var(--lg-accent,#00FF9C) 24%,transparent);
+}
+.rd-meta div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.rd-meta dt{font-size:9.5px;letter-spacing:.18em;color:var(--rd-muted)}
+.rd-meta dd{margin:0;font-size:12px;color:var(--rd-fg);word-break:break-all}
+.rd-url{
+    margin:16px 0 0;
+    font-size:12px;line-height:1.6;word-break:break-all;
+    color:color-mix(in srgb,var(--lg-accent,#00FF9C) 80%,#FFFFFF);
+}
+.rd-url__prompt{color:var(--rd-muted)}
+.rd-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.rd-btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:40px;padding:0 18px;
+    font-family:inherit;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-decoration:none;
+    color:var(--lg-accent,#00FF9C);
+    background:transparent;
+    border:1px solid color-mix(in srgb,var(--lg-accent,#00FF9C) 55%,transparent);
+    border-radius:4px;
+    transition:background .14s ease,box-shadow .14s ease,filter .14s ease;
+}
+.rd-btn:hover{background:color-mix(in srgb,var(--lg-accent,#00FF9C) 12%,transparent);box-shadow:0 0 18px color-mix(in srgb,var(--lg-accent,#00FF9C) 26%,transparent)}
+.rd-btn--primary{
+    flex:1 1 auto;
+    color:var(--lg-on-accent,#04140D);
+    background:var(--lg-accent,#00FF9C);
+    border-color:var(--lg-accent,#00FF9C);
+}
+.rd-btn--primary:hover{filter:brightness(.94);background:var(--lg-accent,#00FF9C)}
+.rd-btn:focus-visible{outline:1px dashed var(--lg-accent,#00FF9C);outline-offset:4px}
+.rd-foot{margin:16px 0 0;font-size:10.5px;letter-spacing:.12em;color:var(--rd-muted)}
+@media (max-width:560px){
+    .rd{padding:24px 12px}
+    .rd-panel{padding:20px 18px}
+    .rd-title{font-size:21px}
+    .rd-scope{width:min(74vh,460px);height:min(74vh,460px);opacity:.35}
+}
+@media (prefers-reduced-motion:reduce){
+    .rd-sweep{animation-duration:11s}
+    .rd-blip{animation:none}
+}
